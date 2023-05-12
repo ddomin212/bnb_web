@@ -1,0 +1,374 @@
+{% extends 'base.html' %}{% block title %}Rentals{% endblock title %} {% block
+content %}
+<div
+  class="modal fade"
+  role="dialog"
+  tabindex="-1"
+  id="modal-2"
+  style="--bs-modal-width: 1000px"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-body" style="background: rgb(31, 30, 33)">
+        <div class="row d-flex flex-wrap">
+          <div class="col-sm-12 col-lg-3">
+            <p style="text-align: center" id="stars">
+              
+            </p>
+            <p style="text-align: center; font-size: 30px; margin-top: -12px">
+              {{avg_rating}} / 5
+            </p>
+          </div>
+          <div class="col">
+            {% for review in reviews %}
+              <div
+                style="
+                  border-top-style: solid;
+                  border-top-color: rgba(255, 255, 255, 0.2);
+                  padding-top: 8px;
+                  margin-bottom: 24px;
+                  padding-left: 10px;
+                  padding-right: 10px;
+                "
+              >
+                <p
+                  class="bg-light border rounded border-0 border-light p-4"
+                  style="
+                    background: rgb(31, 30, 33) !important; /*color: rgb(0,0,0);*/
+                  "
+                >
+                  {{review.text}}
+                </p>
+                <div class="d-flex">
+                  <p style="font-size: 40px; margin-right: 16px; margin-top: -6px">{{review.rating}}</p>
+                  <div>
+                    <p class="fw-bold text-primary mb-0">{{review.displayName}}</p>
+                    <p class="text-muted mb-0">{{review.timestamp.strftime('%b %Y')}}</p>
+                  </div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer" style="background: rgb(31, 30, 33)">
+        <button class="btn btn-light" type="button" data-bs-dismiss="modal">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  class="modal fade"
+  role="dialog"
+  tabindex="-1"
+  id="modal-3"
+  style="--bs-modal-width: 800px"
+>
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+    <form method="POST" action="/user/add-info">
+    <div class="modal-body" style="background: rgb(31, 30, 33)">
+        <div
+          class="text-center"
+          style="border-style: none; padding-right: 10px; padding-left: 10px"
+        >
+          <p
+            style="
+              border-style: none;
+              border-top-style: solid;
+              border-top-color: rgba(255, 255, 255, 0.2);
+              text-align: left;
+            "
+          >
+            {% if not (user.description or user.phoneNumber) and user.uid == session["user"]["uid"] %}
+            <textarea
+              class="form-control w-100"
+              name="description"
+              rows="10"
+              placeholder="Enter your description"
+              style="margin-top: 40px"
+            ></textarea>
+            <input
+              type="text"
+              value=""
+              class="form-control w-100"
+              name="phone"
+              placeholder="Enter number"
+              style="margin-top: 40px"
+            />{% else %}<strong
+            ><span style="text-decoration: underline"
+              >Description</span
+            ></strong
+          ><br><br>
+          {{user.description}}
+            {% endif %}
+          </p>
+        </div>
+      </div>
+      <div class="modal-footer" style="background: rgb(31, 30, 33)">
+        <button class="btn btn-light" type="button" data-bs-dismiss="modal">
+          Close
+        </button>
+        {% if not user.description %}
+            <button class="btn btn-primary" type="submit">Submit</button>
+        {% endif %}
+      </div>
+    </div>
+    </form>
+  </div>
+</div>
+<div class="container">
+  <div class="row">
+    <div class="col-3">
+      <div class="card">
+        <div class="card-body">
+        <img style="margin-bottom: 20px;width: 120px;border-radius:60px" src="{{user.photoURL}}" />
+          <h4 class="card-title">
+            {{user.displayName}}<i
+              class="icon ion-android-checkbox"
+              style="margin-left: 8px"
+            ></i>
+          </h4>
+          {% if user.phoneNumber %}
+          <p>{{user.phoneNumber}}</p>
+          {% endif %}
+          <p class="text-muted card-text mb-0" style="margin-top: 32px">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
+              height="1em"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+              class="bi bi-star-half"
+              style="margin-right: 14px; margin-bottom: 3px"
+            >
+              <path
+                d="M5.354 5.119 7.538.792A.516.516 0 0 1 8 .5c.183 0 .366.097.465.292l2.184 4.327 4.898.696A.537.537 0 0 1 16 6.32a.548.548 0 0 1-.17.445l-3.523 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256a.52.52 0 0 1-.146.05c-.342.06-.668-.254-.6-.642l.83-4.73L.173 6.765a.55.55 0 0 1-.172-.403.58.58 0 0 1 .085-.302.513.513 0 0 1 .37-.245l4.898-.696zM8 12.027a.5.5 0 0 1 .232.056l3.686 1.894-.694-3.957a.565.565 0 0 1 .162-.505l2.907-2.77-4.052-.576a.525.525 0 0 1-.393-.288L8.001 2.223 8 2.226v9.8z"
+              ></path></svg
+            >{{avg_rating}}<span style="margin-left: 4px">({{reviews|length}})</span>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="col-9">
+      <p
+        style="
+          padding-top: 8px;
+          border-style: none;
+          border-top-style: solid;
+          border-top-color: rgba(255, 255, 255, 0.2);
+        "
+      >
+        <span
+          style="color: rgb(211, 207, 201); background-color: rgb(24, 26, 27)"
+        >
+          {% if not (user.description or user.phoneNumber) and user.uid == session["user"]["uid"] %} <button
+          class="btn btn-dark btn-sm"
+          data-bs-toggle="modal"
+          data-bs-target="#modal-3"
+        >
+          add host info
+        </button> {% else %} {{user.description}}
+          
+          {% endif %} </span
+        ><br /><a href="#"></a
+        ><svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="1em"
+          height="1em"
+          fill="currentColor"
+          viewBox="0 0 16 16"
+          class="bi bi-three-dots"
+          style="font-size: 26px; margin-top: 24px"
+          data-bs-toggle="modal"
+          data-bs-target="#modal-3"
+        >
+          <path
+            d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"
+          ></path>
+        </svg>
+      </p>
+      <div
+        class="carousel slide"
+        data-bs-ride="false"
+        id="carousel-1"
+        style="
+          border-top-style: solid;
+          border-top-color: rgba(255, 255, 255, 0.2);
+        "
+      >
+        <div class="carousel-inner">
+          {% set carousels = (((reviews|length)/3)|int) if (((reviews|length)/3)|int) > 0 else 1 %}
+          {% for c in range(carousels) %}
+            {% if loop.first %}
+              <div class="carousel-item active">
+            {% else %}
+              <div class="carousel-item">
+            {% endif %}
+            <div class="row">
+              {% for i in range(3) %}
+              {%if reviews[c*i+i]%}
+              <div class="col">
+                <div>
+                  <p
+                    class="bg-light border rounded border-0 border-light p-4"
+                    style="
+                      background: rgb(
+                        31,
+                        30,
+                        33
+                      ) !important; /*color: rgb(0,0,0);*/
+                    "
+                  >
+                    {{reviews[c*i+i].text}}
+                  </p>
+                  <div class="d-flex">
+                    <p style="font-size: 40px; margin-right: 16px; margin-top: -6px">{{reviews[c*i+i].rating}}</p>
+                    <div>
+                      <p class="fw-bold text-primary mb-0">{{reviews[c*i+i].displayName}}</p>
+                      <p class="text-muted mb-0">{{reviews[c*i+i].timestamp.strftime('%b %Y')}}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+              {% endfor %}
+              
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="1em"
+              height="1em"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+              class="bi bi-three-dots"
+              style="font-size: 26px; margin-top: 40px"
+              data-bs-toggle="modal"
+              data-bs-target="#modal-2"
+            >
+              <path
+                d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"
+              ></path>
+            </svg>
+        <div>
+          <a
+            class="carousel-control-prev"
+            href="#carousel-1"
+            role="button"
+            data-bs-slide="prev"
+            style="width: 50px; height: 150px"
+            ><span class="carousel-control-prev-icon"></span
+            ><span class="visually-hidden">Previous</span></a
+          ><a
+            class="carousel-control-next"
+            href="#carousel-1"
+            role="button"
+            data-bs-slide="next"
+            style="width: 50px; height: 150px"
+            ><span class="carousel-control-next-icon"></span
+            ><span class="visually-hidden">Next</span></a
+          >
+        </div>
+        <ol
+          class="carousel-indicators"
+          style="position: relative; margin-top: -28px"
+        >
+        {% for i in range(carousels) %}
+          {% if loop.first %}
+              <li data-bs-target="#carousel-1" data-bs-slide-to="{{i}}" class="active"></li>
+          {% else %}
+              <li data-bs-target="#carousel-1" data-bs-slide-to="{{i}}"></li>
+          {% endif %}
+        {% endfor %}
+        </ol>
+      </div>
+      <div
+        class="row gy-4 row-cols-1 row-cols-md-2 row-cols-xl-3"
+        style="
+          margin-top: -9px;
+          border-top-style: solid;
+          border-top-color: rgba(255, 255, 255, 0.2);
+        "
+      >
+        {% for item in docs %}
+        <div class="col">
+          <div class="card">
+            <img
+              class="card-img-top w-100 d-block fit-cover"
+              style="height: 200px; border-radius: 16px"
+              src="{{ item.images[0] }}"
+            />
+            <div class="card-body p-4">
+              <h4 class="card-title" style="font-size: 18px">{{item.city}}</h4>
+              <div class="d-flex">
+                <div>
+                  <p class="text-muted mb-0">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="1em"
+                      height="1em"
+                      fill="currentColor"
+                      viewBox="0 0 16 16"
+                      class="bi bi-star-half"
+                      style="margin-right: 14px; margin-bottom: 3px"
+                    >
+                      <path
+                        d="M5.354 5.119 7.538.792A.516.516 0 0 1 8 .5c.183 0 .366.097.465.292l2.184 4.327 4.898.696A.537.537 0 0 1 16 6.32a.548.548 0 0 1-.17.445l-3.523 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256a.52.52 0 0 1-.146.05c-.342.06-.668-.254-.6-.642l.83-4.73L.173 6.765a.55.55 0 0 1-.172-.403.58.58 0 0 1 .085-.302.513.513 0 0 1 .37-.245l4.898-.696zM8 12.027a.5.5 0 0 1 .232.056l3.686 1.894-.694-3.957a.565.565 0 0 1 .162-.505l2.907-2.77-4.052-.576a.525.525 0 0 1-.393-.288L8.001 2.223 8 2.226v9.8z"
+                      ></path></svg
+                    >{{item.avg_rating}}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="row">
+        <a href="/listings/{{user.uid}}"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="1em"
+            height="1em"
+            fill="currentColor"
+            viewBox="0 0 16 16"
+            class="bi bi-three-dots"
+            style="font-size: 26px; margin-top: 16px"
+          >
+            <path
+              d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z"
+            ></path></svg
+        ></a>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function getStars() {
+    var pStars = document.getElementById("stars");
+    var rating = Number("{{avg_rating}}");
+    var stars = "";
+    for (var i = 0; i < Math.floor(rating); i++) {
+      stars += '<i class="icon ion-star" style="font-size: 30px"></i>';
+    }
+    if (rating % 1 != 0) {
+      if (rating - Math.floor(rating) > 0.5) {
+        stars += '<i class="icon ion-ios-star-half" style="font-size: 30px"></i>';
+      } else {
+        stars += '<i class="icon ion-android-star-outline" style="font-size: 30px"></i>';
+      }
+    }
+    for (var i = Math.ceil(rating); i < 5; i++) {
+      stars += '<i class="icon ion-android-star-outline" style="font-size: 30px"></i>';
+    }
+    pStars.innerHTML = stars;
+  }
+  getStars();
+</script>
+{% endblock %}
+```

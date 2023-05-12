@@ -1,0 +1,69 @@
+{% extends 'base.html' %} {% block title %}Add review{% endblock title %} {%
+block content %}
+
+<form method="post" id="review-form">
+  <div class="container" style="background: rgb(31, 30, 33); max-width: 600px">
+    <section class="py-4 py-xl-5">
+      <div class="container">
+        <div class="row d-flex justify-content-center">
+          <div class="col-12" style="margin-bottom: -64px">
+            <div class="card mb-5">
+              <div class="card-body p-sm-5" style="background: #1f1e21">
+                <h2 class="text-center mb-4">
+                  {{"Leave" if not doc else "Edit"}} a review
+                </h2>
+                <select class="form-select" name="rating" id="rating">
+                  <option value="0">Trash</option>
+                  <option value="1">1 Star ★</option>
+                  <option value="2">2 Stars ★★</option>
+                  <option value="3">3 Stars ★★★</option>
+                  <option value="4">4 Stars ★★★★</option>
+                  <option value="5">Full house ★★★★★</option>
+                </select>
+                <div class="mb-3"></div>
+                <div class="mb-3"></div>
+                <div class="mb-3">
+                  <textarea
+                    id="message-2"
+                    class="form-control"
+                    name="message"
+                    rows="6"
+                    placeholder="Message"
+                  >
+                    {{doc.text if doc else None}}</textarea
+                  >
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="container text-center" style="background: rgb(31, 30, 33)">
+    <button class="btn btn-primary" type="submit" style="width: 105px">
+      Send</button
+    ><button
+      class="btn btn-light"
+      type="button"
+      data-bs-dismiss="modal"
+      style="margin-left: 30px; width: 105px"
+    >
+      Close
+    </button>
+  </div>
+</form>
+{% if doc %}
+<script>
+  const select = document.getElementById("rating"); // Replace 'my-select' with the ID of your select element
+  const valueToSelect = "{{doc.rating}}"; // Replace with the number value representing the option you want to select
+
+  for (let i = 0; i < select.options.length; i++) {
+    const option = select.options[i];
+    if (option.value === valueToSelect) {
+      option.selected = true;
+      break;
+    }
+  }
+</script>
+{% endif %} {% endblock %} ```

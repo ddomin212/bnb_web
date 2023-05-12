@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <title>
+      {% block title %}
+      {% endblock %}
+    </title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800&amp;display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=ABeeZee&amp;display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abyssinica+SIL&amp;display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alata&amp;display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alike&amp;display=swap" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'bootstrap/css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/Articles-Cards-images.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/divider-text-middle.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/Modal-Video-Plyrjs-Customized.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename = 'css/VentasPro-Contact-Form.css') }}" />
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC6VkFrRH0WVlOcYL51ehPGK5l1Bb3D2Ts&libraries=places&language=en"></script>
+    <style>
+      .typeahead {
+        width: 50%;
+        top: 60px !important;
+        left: 50px !important;
+      }
+    </style>
+    {% block head %}
+    {% endblock %}
+  </head>
+
+  <body style="font-family: Alata, sans-serif; background: rgb(31, 30, 33)">
+    {% if hidenav != True %}
+      <nav class="navbar navbar-dark navbar-expand-md sticky-top py-3" id="mainNav" style="background: rgb(31, 30, 33)">
+        <div class="container">
+          <a class="navbar-brand d-flex align-items-center" href="/">
+            <span>
+              <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-triangle-half" style="margin-right: 12px; margin-bottom: 2px">
+                <path d="M8.065 2.016A.13.13 0 0 0 8.002 2v11.983l6.856.017a.12.12 0 0 0 .066-.017.162.162 0 0 0 .054-.06.176.176 0 0 0-.002-.183L8.12 2.073a.146.146 0 0 0-.054-.057zm-1.043-.45a1.13 1.13 0 0 1 1.96 0l6.856 11.667c.458.778-.091 1.767-.98 1.767H1.146c-.889 0-1.437-.99-.98-1.767L7.022 1.566z"></path>
+              </svg>bnb.ai
+            </span>
+          </a><button data-bs-toggle="collapse" class="navbar-toggler" data-bs-target="#navcol-1"><span class="visually-hidden">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+
+          <div class="collapse navbar-collapse" id="navcol-1">
+            <ul class="navbar-nav mx-auto">
+              <form class="d-flex" method="post" action="/search">
+                <li class="mt-2 nav-item">
+                  <div class="nav-item dropdown">
+                    <a class="dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" href="#" style="
+                      margin-right: 23px;
+                      color: rgb(255, 255, 255);
+                      font-weight: bold;
+                    ">Anywhere</a>
+                    <div class="dropdown-menu text-center">
+                      <select style="border-style: none; width: 150px; height: 30px" name="country">
+                        {% for country in countries %}
+                          <option value="{{ country }}">{{ country }}</option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                </li>
+                <li class="mt-2 nav-item">
+                  <div class="nav-item dropdown">
+                    <a class="dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" href="#" style="
+                      margin-right: 23px;
+                      color: rgb(255, 255, 255);
+                      font-weight: bold;
+                    ">Anytime</a>
+                    <div class="dropdown-menu" style="text-align: center">
+                      <p style="color: rgba(0, 0, 0, 0.71); margin-bottom: 0px">From</p>
+                      <input name="from" type="date" style="
+                        border-style: none;
+                        margin-bottom: 12px;
+                        text-align: center;
+                      " />
+                      <p style="color: rgba(0, 0, 0, 0.71); margin-bottom: 0px">To</p>
+                      <input name="to" type="date" style="border-style: none; text-align: center" />
+                    </div>
+                  </div>
+                </li>
+                <li class="mt-2 nav-item">
+                  <div class="nav-item dropdown">
+                    <a class="dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" href="#" style="
+                      margin-right: 23px;
+                      color: rgb(255, 255, 255);
+                      font-weight: bold;
+                    ">Any price</a>
+                    <div class="dropdown-menu" style="text-align: center">
+                      <p style="color: rgba(0, 0, 0, 0.71); margin-bottom: 0px">Min</p>
+                      <input name="from-price" type="number" style="
+                        border-style: none;
+                        margin-bottom: 12px;
+                        text-align: center;
+                        max-width: 100px;
+                      " />
+                      <p style="color: rgba(0, 0, 0, 0.71); margin-bottom: 0px">Max</p>
+                      <input name="to-price" type="number" style="
+                        border-style: none;
+                        text-align: center;
+                        max-width: 100px;
+                      " />
+                    </div>
+                  </div>
+                </li>
+                <li class="mt-2 nav-item">
+                  <div class="nav-item dropdown">
+                    <a class="dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" href="#" style="margin-right: 23px; color: rgb(255, 255, 255)">Guests</a>
+                    <div class="dropdown-menu" style="
+                      text-align: center;
+                      height: 50px;
+                      min-width: 100px;
+                      width: 100px;
+                    ">
+                      <input name="guests" type="number" style="width: 70px; border-style: none; height: 30px" max="9" placeholder="no." />
+                    </div>
+                  </div>
+                </li>
+                <li class="nav-item">
+                  <button class="btn btn-dark">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16" class="bi bi-search" style="font-size: 16px">
+                      <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"></path>
+                    </svg>
+                  </button>
+                </li>
+              </form>
+            </ul>
+            <div class="dropdown">
+              <a class="dropdown-toggle" aria-expanded="false" data-bs-toggle="dropdown" href="#" style="
+                background: var(--bs-primary);
+                color: rgb(255, 255, 255);
+                padding: 15px;
+                border-radius: 30px;
+                padding-right: 24px;
+                padding-left: 24px;
+                --bs-primary: #2d2c38;
+                --bs-primary-rgb: 45, 44, 56;
+                padding-top: 14px;
+              "><strong>Actions</strong></a>
+              <div class="dropdown-menu" style="margin-top: 12px">
+                {% if session['user'] %}
+                  <a class="dropdown-item" href="/my-listings">Posts</a>
+                  <a class="dropdown-item" href="/favorites">Favourites</a>
+                  <a class="dropdown-item" href="/stays">Stays</a><a class="dropdown-item" href="/user/{{ session['user']['uid'] }}" style="border-top: solid 1px">Profile</a>
+                  <a class="dropdown-item" href="/add-1">Add post</a><a class="dropdown-item" href="/logout">Log out</a>
+                {% else %}
+                  <a class="dropdown-item" href="/login">Log in</a>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+    {% endif %}
+    <div id="content">
+      {% block content %}
+      {% endblock %}
+    </div>
+    {% block scripts %}
+    {% endblock %}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" /></script>
+    <script src="{{ url_for('static', filename = 'js/bold-and-dark.js') }}" /></script>
+    <script src="{{ url_for('static', filename = 'js/Modal-Video-Plyrjs-Customized-plyr.js') }}" /></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+  </body>
+</html>

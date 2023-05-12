@@ -1,0 +1,46 @@
+{% extends 'base.html' %} {% block title %}
+  Listings
+{% endblock %} {% block content %}
+  <section class="py-4 py-xl-5"></section>
+  <div class="container py-4 py-xl-5">
+    <div class="row gy-4 gy-md-0">
+      <div class="col-md-6 text-center text-md-start d-flex d-sm-flex d-md-flex justify-content-center align-items-center justify-content-md-start align-items-md-center justify-content-xl-center">
+        <div style="max-width: 500px;width: 300px;">
+          <h2 class="text-uppercase fw-bold"></h2>
+          <p class="my-3">What do you want to edit?</p>
+          <ul>
+            <li>
+              <a href="/add-1/{{ pid }}">Where the apartment is</a>
+            </li>
+            <li>
+              <a href="/add-8/{{ pid }}">What is the price of it</a>
+            </li>
+            <li>
+              <a href="/add-4/{{ pid }}">What amneties we offer</a>
+            </li>
+            <li>
+              <a href="/add-6/{{ pid }}">Images</a>
+            </li>
+            <li>
+              <a href="/add-5/{{ pid }}">Description</a>
+            </li>
+            <li>
+              <a href="/add-2/{{ pid }}">Availibility and type</a>
+            </li>
+            <li>
+              <a href="/add-7/{{ pid }}">Basics - beds, baths etc.</a>
+            </li>
+            <li>
+              <a href="/add-3/{{ pid }}">How much of the space is rented</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="p-xl-5 m-xl-5">
+          <img class="rounded img-fluid w-100 fit-cover" style="min-height: 300px;border-width: 3px;border-style: groove;height: 400px;" src="{{ url_for('static', filename = 'img/Leonardo_Diffusion_A_row_of_mexicancolonial_houses_in_front_of_0.jpg') }}" />
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

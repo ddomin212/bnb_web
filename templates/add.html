@@ -1,0 +1,146 @@
+{% extends 'base.html' %}{% block title %}Rentals{% endblock title %} {% block
+content %}
+<form
+    class="text-start"
+    id="form-1"
+    method="post"
+    enctype="multipart/form-data"
+  >
+{% if doc %}
+<div class="text-center container" style="border: solid 2px">
+  <h1 class="text-center mb-3">Update Rental Images</h1>
+  <div class="row">
+    {% for img in doc.images %}
+      <div class="col" style="object-fit: contain;width: 300px;height: 200px;"><a href="/delete-img/{{doc.id|int}}/{{img.rsplit("/", 1)[1]}}" style="position: absolute;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor" style="font-size: 36px;color: rgba(255,15,0,0.85);">
+                  
+                  <path d="M0 256C0 114.6 114.6 0 256 0C397.4 0 512 114.6 512 256C512 397.4 397.4 512 256 512C114.6 512 0 397.4 0 256zM168 232C154.7 232 144 242.7 144 256C144 269.3 154.7 280 168 280H344C357.3 280 368 269.3 368 256C368 242.7 357.3 232 344 232H168z"></path>
+              </svg></a><img src="{{img}}" style="width: 300px;" /></div>
+    {% endfor %}
+  </div>
+  <div class="row d-xl-flex justify-content-center justify-content-xl-center">
+      <div class="col d-xl-flex d-xxl-flex justify-content-center justify-content-xl-center" style="margin-top: 20px;margin-bottom: 20px;"><input
+        id="imgs"
+        class="form-control w-75"
+        type="file"
+        name="image"
+        multiple
+      /></div>
+  </div>
+</div>
+{% endif %}
+<div class="mt-3 container" style="border: solid 2px">
+  <h1 class="text-center mb-3">{{"Update Rental Information" if doc else "Create Rental"}}</h1>
+  
+    <div class="row">
+      <div class="col-md-6">
+        <div class="row mb-3">
+          <div class="col">
+            <label class="form-label" id="lbl-city-1" for="txt-city"
+              >City</label
+            >
+            <input type="text" value="{{ doc.location if doc else "" }}"
+            class="typeahead form-control w-100" id="txt-city" name="city"
+            data-provide="typeahead" placeholder="Enter city" />
+          </div>
+          <div class="col">
+            <label class="form-label" id="lbl-nombre-1" for="txt-nombre"
+              >phone</label
+            >
+            <input type="text" value="{{ doc.phone if doc else "" }}"
+            class="form-control w-100" id="txt-nombre" name="phone"
+            placeholder="Enter phone" />
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" id="lbl-nombre-1" for="txt-nombre"
+              >Tags(separate with ,)</label
+            >
+            <input type="text" value="{{ doc.tags if doc else "" }}"
+            class="form-control w-100" id="txt-nombre" name="tags"
+            placeholder="Enter tags" />
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="mb-3">
+          <label class="form-label" id="lbl-email-3" for="txt-email"
+            >Available renting period (from-to)</label
+          >
+          <div class="row">
+            <div class="col">
+              <input class="form-control" type="date" name="from" value="{{
+              doc.from if doc else "" }}"/>
+            </div>
+            <div class="col">
+              <input class="form-control" type="date" name="to" value="{{ doc.to
+              if doc else "" }}"/>
+            </div>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div class="row">
+            <div class="col">
+              <div>
+                <label class="form-label" id="lbl-telefono-1" for="txt-telefono"
+                  >Max no. guests</label
+                ><input class="form-control" name="maxGuests" type="number"
+                value="{{ doc.maxGuests if doc else "" }}"/>
+              </div>
+            </div>
+            <div class="col">
+              <div class="mb-3">
+                <label class="form-label" id="lbl-telefono-3" for="txt-telefono"
+                  >Price per night</label
+                ><input class="form-control" name="price" value="{{ doc.price if
+                doc else "" }}" type="number" />
+              </div>
+            </div>
+          </div>
+        </div>
+        {% if not doc %}
+        <div class="mb-3" style="margin-top: -16px">
+          <label class="form-label" id="lbl-telefono-3" for="imgs"
+            >Upload images</label
+          >
+          <input
+            id="imgs"
+            class="form-control"
+            type="file"
+            name="image"
+            multiple
+          />
+        </div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="mb-3" style="text-align: center">
+      <textarea
+        class="form-control w-100"
+        id="txt-consulta-2"
+        rows="10"
+        name="description"
+        style="margin-top: 40px"
+      >{{ doc.description if doc else "" }}</textarea
+      ><button
+        class="btn btn-primary"
+        type="submit"
+        style="background: rgb(45, 44, 56); margin: 16px"
+      >
+        Submit
+      </button>
+    </div>
+  
+</div>
+</form>
+<script>
+  $(document).ready(function () {
+    var input = document.getElementsByClassName("typeahead")[0];
+    var autocomplete = new google.maps.places.Autocomplete(input, { language: 'en' });
+
+    // Add event listener for when a suggestion is selected
+    google.maps.event.addListener(autocomplete, "place_changed", function () {
+      var place = autocomplete.getPlace();
+      console.log(place.name);
+    });
+  });
+</script>
+{% endblock content %}

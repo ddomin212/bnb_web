@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block title %}
+  Description
+{% endblock %}
+{% block content %}
+  <header class="bg-dark"></header>
+  <form method="post">
+    <div class="container" style="text-align: center;">
+      <h4 style="margin-bottom: 30px;">Add your description</h4>
+      <textarea name="desc" style="max-width: 1000px;min-width: 400px;" rows="20">{{doc.description if doc else ""}}</textarea>
+        <br></br>
+      <button type="submit" class="btn btn-primary" style="margin-top: 30px;">Next</button>
+    </div>
+  </form>
+  <div class="container text-white py-4 py-lg-5" style="background: #1f1e21;">
+    <p style="font-size: 20px;text-align: center;">step 7/5</p>
+  </div>
+{% endblock %}

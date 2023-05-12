@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}
+  Location
+{% endblock %}
+{% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'css/Multiple-Input-Select-Pills.css') }}" />
+{% endblock %}Tags{% block content %}
+  <section class="py-4 py-xl-5"></section>
+  <div class="container py-4 py-xl-5" style="background: #1f1e21 !important;text-align: center;">
+    <div class="row">
+      <div class="col">
+        <h5 style="text-align: center;">What additional things can you offer?</h5>
+        <div class="card">
+          <form method="post">
+            <fieldset multiple>
+              <div class="card-body">
+                <div>
+                  <h4>Basics</h4>
+                  <div>
+                    <div class="selectgroup selectgroup-pills">
+                      <label class="selectgroup-item">
+                        <input type="checkbox" name="basics" value="Wifi" class="selectgroup-input" />
+                        <span class="selectgroup-button">Wifi</span>
+                      </label>
+                      <label class="selectgroup-item">
+                        <input type="checkbox" name="basics" value="TV" class="selectgroup-input" />
+                        <span class="selectgroup-button">TV</span>
+                      </label>
+                      <label class="selectgroup-item">
+                        <input type="checkbox" name="basics" value="Air conditioning" class="selectgroup-input" />
+                        <span class="selectgroup-button">Air conditioning</span>
+                      </label>
+                      <label class="selectgroup-item">
+                        <input type="checkbox" name="basics" value="Free parking" class="selectgroup-input" />
+                        <span class="selectgroup-button">Free parking</span>
+                      </label>
+                      <label class="selectgroup-item">
+                        <input type="checkbox" name="basics" value="Paid parking" class="selectgroup-input" />
+                        <span class="selectgroup-button">Paid parking</span>
+                      </label>
+                      <label class="selectgroup-item">
+                        <input type="checkbox" name="basics" value="Kitchen" class="selectgroup-input" />
+                        <span class="selectgroup-button">Kitchen</span>
+                      </label>
+                      <label class="selectgroup-item">
+                        <input type="checkbox" name="basics" value="Washing machine" class="selectgroup-input" />
+                        <span class="selectgroup-button">Washing machine</span>
+                      </label>
+                      <label class="selectgroup-item">
+                        <input type="checkbox" name="basics" value="Air conditioning" class="selectgroup-input" />
+                        <span class="selectgroup-button">Air conditioning</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div style="margin-top: 32px;">
+                    <h4>Safety</h4>
+                  </div>
+                  <div>
+                    <div class="selectgroup selectgroup-pills">
+                      <label class="selectgroup-item">
+                        <input type="checkbox" name="safety" value="First aid kit" class="selectgroup-input" />
+                        <span class="selectgroup-button">First aid kit</span>
+                      </label>
+                      <label class="selectgroup-item">
+                        <input type="checkbox" name="safety" value="CO detector" class="selectgroup-input" />
+                        <span class="selectgroup-button">CO detector</span>
+                      </label>
+                      <label class="selectgroup-item">
+                        <input type="checkbox" name="safety" value="Smoke alarm" class="selectgroup-input" />
+                        <span class="selectgroup-button">Smoke alarm</span>
+                      </label>
+                      <label class="selectgroup-item">
+                        <input type="checkbox" name="safety" value="Fire extinguisher" class="selectgroup-input" />
+                        <span class="selectgroup-button">Fire extinguisher</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div style="margin-top: 32px;">
+                    <h4>Standouts</h4>
+                    <div class="selectgroup selectgroup-pills">
+                      <label class="selectgroup-item">
+                        <input type="checkbox" name="standout" value="Fireplace" class="selectgroup-input" />
+                        <span class="selectgroup-button">Fireplace</span>
+                      </label>
+                      <label class="selectgroup-item"><input type="checkbox" name="standout" value="Pool" class="selectgroup-input" /><span class="selectgroup-button">Pool</span></label><label class="selectgroup-item"><input type="checkbox" name="standout" value="Patio" class="selectgroup-input" /><span class="selectgroup-button">Patio</span></label><label class="selectgroup-item"><input type="checkbox" name="standout" value="Firepit" class="selectgroup-input" /><span class="selectgroup-button">Firepit</span></label><label class="selectgroup-item"><input type="checkbox" name="standout" value="Outdoor dining" class="selectgroup-input" /><span class="selectgroup-button">Outdoor dining</span></label><label class="selectgroup-item"><input type="checkbox" name="standout" value="Workspace" class="selectgroup-input" /><span class="selectgroup-button">Workspace</span></label>
+                    </div>
+                  </div>
+                  <div style="margin-top: 32px;">
+                    <h4>Views</h4>
+                    <div class="selectgroup selectgroup-pills">
+                      <label class="selectgroup-item"><input type="checkbox" name="views" value="Mountain" class="selectgroup-input" /><span class="selectgroup-button">Mountain</span></label><label class="selectgroup-item"><input type="checkbox" name="views" value="City" class="selectgroup-input" /><span class="selectgroup-button">City</span></label><label class="selectgroup-item"><input type="checkbox" name="views" value="Beach" class="selectgroup-input" /><span class="selectgroup-button">Beach</span></label><label class="selectgroup-item"><input type="checkbox" name="views" value="Nature" class="selectgroup-input" /><span class="selectgroup-button">Nature</span></label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </fieldset>
+            <button class="btn btn-dark" type="submit">Next</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <header class="bg-dark"></header>
+  <div class="container text-white py-4 py-lg-5" style="background: #1f1e21;">
+    <p style="font-size: 20px;text-align: center;">step 5/5</p>
+  </div>
+  <script>
+    // get all checkbox inputs within the fieldset
+    const checkboxes = document.querySelectorAll('fieldset input[type="checkbox"]')
+    const checksJSON = JSON.parse('{{doc.tags|tojson if doc else "[]"}}')
+    var checks = [...checksJSON.basics, ...checksJSON.safety, ...checksJSON.standout, ...checksJSON.views]
+    console.log(checks)
+    
+    checkboxes.forEach((checkbox) => {
+      if (checks.indexOf(checkbox.value) !== -1) {
+        checkbox.checked = true
+      }
+    })
+  </script>
+{% endblock %}

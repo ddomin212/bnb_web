@@ -1,0 +1,7 @@
+Flask==2.2.3
+firebase-admin
+redis
+stripe
+gunicorn
+flask-session
+sydney-py

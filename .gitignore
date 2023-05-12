@@ -1,0 +1,7 @@
+.env
+/bnbenv
+**/__pycache__
+config/creds.json
+Dockerfile
+.dockerignore
+```

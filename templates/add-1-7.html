@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}
+  Basics
+{% endblock %}
+{% block content %}
+  <section class="py-4 py-xl-5"></section>
+  <div class="container py-4 py-xl-5">
+    <div class="row gy-4 gy-md-0">
+      <div class="col-md-6 text-center text-md-start d-flex d-sm-flex d-md-flex justify-content-center align-items-center justify-content-md-start align-items-md-center justify-content-xl-center">
+        <div style="max-width: 500px;width: 300px;">
+          <h2 class="text-uppercase fw-bold"></h2>
+          <p class="my-3">Share some basics</p>
+          <form method="post">
+            <input class="form-control-sm form-control w-50" name="bedrooms" type="number" value="{{doc.bedrooms if doc else ''}}" style="margin-top: 16px;background: var(--bs-body-color);" placeholder="Bedrooms" max="50" min="1" />
+            <input class="form-control-sm form-control w-50" name="baths" type="number" value="{{doc.baths if doc else ''}}" style="margin-top: 16px;background: var(--bs-body-color);" placeholder="Bathrooms" max="50" min="1" />
+            <input class="form-control-sm form-control w-50" name="beds" type="number" value="{{doc.beds if doc else ''}}" style="margin-top: 16px;background: var(--bs-body-color);" placeholder="Beds" max="50" min="1" />
+            <input class="form-control-sm form-control w-50" name="guests" type="number" value="{{doc.guests if doc else ''}}" style="margin-top: 16px;background: var(--bs-body-color);" placeholder="Max. guests" max="50" min="1" />
+            <button class="btn btn-dark btn-sm me-2" role="submit" style="margin-top: 16px;">Continue</button>
+          </form>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="p-xl-5 m-xl-5">
+          <img class="rounded img-fluid w-100 fit-cover" style="min-height: 300px;border-width: 3px;border-style: groove;height: 400px;" src="{{ url_for('static', filename = 'img/Leonardo_Diffusion_wall_art_mockup_on_a_bedroom_The_art_is_a_p_0.jpg') }}" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <header class="bg-dark"></header>
+  <footer class="text-center bg-dark">
+    <div class="container text-white py-4 py-lg-5" style="background: #1f1e21;">
+      <p style="font-size: 20px;">step 4/5</p>
+    </div>
+  </footer>
+{% endblock %}

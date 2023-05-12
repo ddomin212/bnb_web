@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}
+  Location
+{% endblock %}
+{% block content %}
+  <section class="py-4 py-xl-5"></section>
+  <div class="container py-4 py-xl-5">
+    <div class="row gy-4 gy-md-0">
+      <div class="col-md-6 text-center text-md-start d-flex d-sm-flex d-md-flex justify-content-center align-items-center justify-content-md-start align-items-md-center justify-content-xl-center">
+        <form method="post">
+          <div style="max-width: 500px; width: 300px">
+            <h2 class="text-uppercase fw-bold"></h2>
+            <p class="my-3">Where is the place you are renting</p>
+            <input type="text" value="{{ doc.loc + ', ' + doc.city + ', ' + doc.district + ', ' + doc.country if doc else '' }}" class="typeahead form-control w-100" id="txt-city" name="address_line" data-provide="typeahead" placeholder="Enter city" />
+            <input class="form-control-sm form-control" type="text" name="address_line2" value="{{ doc.apt if doc else '' }}" placeholder="Apt, suite (optional)" style="margin-top: 10px" /><button class="btn btn-dark btn-sm me-2" role="submit" style="margin-top: 16px">Continue</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="col-md-6">
+        <div class="p-xl-5 m-xl-5">
+          <img class="rounded img-fluid w-100 fit-cover" style="
+            min-height: 300px;
+            border-width: 3px;
+            border-style: groove;
+            height: 400px;
+          " src="{{ url_for('static', filename = 'img/Leonardo_Diffusion_Vintage_Lake_House_Painting_Square_Landscap_0.jpg') }}" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <header class="bg-dark"></header>
+  <div class="container text-white py-4 py-lg-5" style="background: #1f1e21">
+    <p style="font-size: 20px; text-align: center">step 1/5</p>
+  </div>
+  <script>
+    $(document).ready(function () {
+      var input = document.getElementsByClassName('typeahead')[0]
+      var autocomplete = new google.maps.places.Autocomplete(input, {
+        language: 'en'
+      })
+    
+      // Add event listener for when a suggestion is selected
+      google.maps.event.addListener(autocomplete, 'place_changed', function () {
+        var place = autocomplete.getPlace()
+        console.log(place.name)
+      })
+    })
+  </script>
+{% endblock %}
