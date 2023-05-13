@@ -5,13 +5,19 @@ import os
 
 
 def create_app(testing=False):
-    if os.getenv("FLASK_ENV") != 'production':
+    if os.getenv("FLASK_ENV") != "production":
         from dotenv import load_dotenv
+
         load_dotenv()
     app = Flask(__name__)
     app.secret_key = os.getenv("PAGE_SECRET_KEY")
-    app.config['UPLOAD_FOLDER'] = 'static/uploads'
+    app.config["UPLOAD_FOLDER"] = "static/uploads"
     initialize_extensions(app, testing=testing)
+
+    @app.context_processor
+    def inject_variables():
+        return {"env": os.environ}
+
     app.register_blueprint(main)
     app.register_blueprint(authapi)
     app.register_blueprint(posts)
@@ -25,5 +31,5 @@ def create_app(testing=False):
 
 app = create_app()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
