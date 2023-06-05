@@ -24,7 +24,7 @@ def test_add_1_get(auth_client):
 
 
 def test_add_1_edit_post(auth_client):
-    with patch("firebase_admin.firestore.client") as firestore:
+    with patch("firebase_admin.firestore.client"):
         response = auth_client.post(
             "/add-1/1",
             data={
@@ -51,3 +51,6 @@ def test_add_1_post(auth_client):
     # Assert the response status code
     assert response.status_code == 302
     assert response.headers["Location"] == "/add-2"
+
+
+# TODO: tests for the other add routes, the add docstrings

@@ -1,3 +1,4 @@
+""" Test the various routes in for listings. """
 from unittest.mock import patch, MagicMock
 from flask import session
 from pytest_mock import mocker
@@ -5,6 +6,12 @@ from utils.firebase import get_avg_rating
 
 
 def test_login_wrapper(client):
+    """
+    Tests the login_wrapper decorator. This test checks that the decorator redirects to the
+    login page if the user is not logged in.
+
+    @param client - The client to use for the request
+    """
     response = client.get("/favorites")
 
     # Check that the response is successful
@@ -15,6 +22,12 @@ def test_login_wrapper(client):
 
 
 def test_index_route(client, mocked_posts):
+    """
+    Make a request to the index route and check that the response is 200.
+
+    @param client - The client to use for the request
+    @param mocked_posts - A list of mocked posts
+    """
     with patch("firebase_admin.firestore.client") as firebase_mock:
         firebase_mock.return_value.collection.return_value.stream.return_value = [
             MagicMock(to_dict=MagicMock(return_value=post)) for post in mocked_posts
@@ -29,6 +42,12 @@ def test_index_route(client, mocked_posts):
 
 
 def test_my_listings_route(auth_client, mocked_posts):
+    """
+    Make a request to the index route and verify that it returns the correct listings.
+
+    @param auth_client - An authenticated client to use for the test
+    @param mocked_posts - A list of mocked posts
+    """
     with patch("firebase_admin.firestore.client") as firebase_mock:
         firebase_mock.return_value.collection.return_value.where.return_value.stream.return_value = [
             MagicMock(to_dict=MagicMock(return_value=post)) for post in mocked_posts
@@ -43,6 +62,12 @@ def test_my_listings_route(auth_client, mocked_posts):
 
 
 def test_my_stays_route(auth_client, mocked_posts):
+    """
+    Test the my_stays route.
+
+    @param auth_client - An authenticated client to use for the test
+    @param mocked_posts - A list of mocked posts
+    """
     with patch("firebase_admin.firestore.client") as firebase_mock:
         mocked_rentals = [
             {
@@ -97,6 +122,13 @@ def test_my_stays_route(auth_client, mocked_posts):
 
 
 def test_favs_auth(auth_client, mocked_posts, mocked_favs):
+    """
+    Test the favorites route while autheticated.
+
+    @param auth_client - An authenticated client to use for the test
+    @param mocked_posts - A list of mocked posts
+    @param mocked_favs - A list of mocked favorites
+    """
     with patch("firebase_admin.firestore.client") as firestore_mock:
         # Mock the database query to return a user's favorites
         firestore_mock.return_value.collection.return_value.document.return_value.get.return_value.to_dict.return_value = (

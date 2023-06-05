@@ -1,11 +1,15 @@
-from unittest.mock import patch
-from flask import session
-from unittest.mock import patch, MagicMock
-from views.profile import view_user
+""" This module contains tests for the profile view. """
 from datetime import datetime
+from unittest.mock import patch, MagicMock
+from flask import session
 
 
-def test_add_description(auth_client):
+def test_add_description(auth_client: Any):
+    """
+    Test adding a description to the user's profile page.
+
+    @param auth_client - An authenticated client to use for the test
+    """
     # Set up test data
     phone = "555-555-5555"
     description = "This is a test description"
@@ -28,7 +32,13 @@ def test_add_description(auth_client):
         mock_set_claims.assert_called_once_with(uid, expected_data)
 
 
-def test_view_user(client, mocked_posts):
+def test_view_user(client: Any, mocked_posts: list[dict[str, Any]]):
+    """
+    Test the view_user method. This is a test for the rating_view. py script.
+
+    @param client - An authenticated client to use for the test
+    @param mocked_posts - A list of mocked posts
+    """
     # Set up test data
     uid = "test_user_id"
     user_data = {

@@ -1,3 +1,4 @@
+""" This module contains all the routes related to adding a new post. """
 from flask import Blueprint, render_template, redirect, request, session, jsonify
 from utils.firebase import add_to_firestore, update_firestore, upload_images
 from config import fetch_db
@@ -8,6 +9,16 @@ add = Blueprint("add", __name__)
 
 @add.route("/edit/<pid>", methods=["GET"])
 def edit(pid):
+    """
+    View to edit a record. This is a special page for users
+    who want to edit an existing record and presents them
+    with various options to edit the record
+
+    @param pid - ID of the record to edit. It's the same as the pid
+    in the database but we don't know if it is a new record
+
+    @return The template that renders the edit. html template and returns
+    """
     return render_template("edit.html", pid=pid)
 
 
@@ -15,10 +26,21 @@ def edit(pid):
 @add.route("/add-1/<pid>", methods=["GET", "POST"])
 @login_required
 def add_loc(pid):
+    """
+    Add or edit a location to the database. This is a form to allow users
+    to enter an address in the format of a city state and country
+
+    @param pid - Identifier of the person to add to the database
+
+    @return redirect to the next step in the add process.
+            If you are editing the post, redirect to the property page.
+    """
+    # This is the main entry point for the firestore.
     if request.method == "POST":
         adress_line = request.form["address_line"].strip().split(",")
         apt = request.form["address_line2"].strip()
         district = None
+        # This function is used to display the address
         if len(adress_line) == 4:
             loc = adress_line[0]
             city = adress_line[1]
@@ -42,6 +64,7 @@ def add_loc(pid):
             "apt": apt if apt else "None",
             "user_uid": session["user"]["uid"],
         }
+        # Add or edit a user s post.
         if pid:
             update_firestore(data, pid, "posts")
             return redirect("/edit/" + pid)
@@ -49,6 +72,7 @@ def add_loc(pid):
             add_to_firestore(data, "posts")
             return redirect("/add-2")
     else:
+        # This is the main page for the user s post
         if pid:
             ref = (
                 fetch_db()
@@ -56,6 +80,7 @@ def add_loc(pid):
                 .document(pid + "|" + str(session["user"]["uid"]))
             )
             doc = ref.get().to_dict()
+            # If doc is not found return 404
             if not doc:
                 return render_template(
                     "message.html", error_message="Post not found", status_code=404
@@ -69,24 +94,35 @@ def add_loc(pid):
 @add.route("/add-2/<pid>", methods=["GET", "POST"])
 @login_required
 def add_type(pid):
+    """
+    Add or edit a type of a post. This can be an apartment, house, exprience and so on.
+
+    @param pid - pid of the post to add type to
+
+    @return redirect to the next step in the add process.
+            If you are editing the post, redirect to the property page.
+    """
     from utils.firebase import convert_date
 
+    # POST POST request. form type from date to date
     if request.method == "POST":
-        type = request.form["type"].strip()
+        typ = request.form["type"].strip()
         vfrom = convert_date(request.form["from"])
         to = convert_date(request.form["to"])
         data = {
-            "type": type,
+            "type": typ,
             "from": vfrom,
             "to": to,
         }
         update_firestore(
             data, session["user"]["creation_id"] if not pid else pid, "posts"
         )
+        # Redirect to edit page if pid is not set
         if pid:
             return redirect("/edit/" + pid)
         return redirect("/add-3")
     else:
+        # This is the main page for the user s post
         if pid:
             ref = (
                 fetch_db()
@@ -94,6 +130,7 @@ def add_type(pid):
                 .document(pid + "|" + str(session["user"]["uid"]))
             )
             doc = ref.get().to_dict()
+            # If doc is not found return 404
             if not doc:
                 return render_template(
                     "message.html", error_message="Post not found", status_code=404
@@ -107,6 +144,16 @@ def add_type(pid):
 @add.route("/add-3/<pid>", methods=["GET", "POST"])
 @login_required
 def add_space(pid):
+    """
+    Add or edit the provided space of the property.
+    This can be a the whole apartement, a room or a bed.
+
+    @param pid - pid of the post to add provided space to
+
+    @return redirect to the next step in the add process.
+            If you are editing the post, redirect to the property page.
+    """
+    # Add a new post to the firestore
     if request.method == "POST":
         space = request.form["space"].strip()
         data = {
@@ -115,10 +162,12 @@ def add_space(pid):
         update_firestore(
             data, session["user"]["creation_id"] if not pid else pid, "posts"
         )
+        # Redirect to edit page if pid is not set
         if pid:
             return redirect("/edit/" + pid)
         return redirect("/add-4")
     else:
+        # This is the main page for the user s post
         if pid:
             ref = (
                 fetch_db()
@@ -126,6 +175,7 @@ def add_space(pid):
                 .document(pid + "|" + str(session["user"]["uid"]))
             )
             doc = ref.get().to_dict()
+            # If doc is not found return 404
             if not doc:
                 return render_template(
                     "message.html", error_message="Post not found", status_code=404
@@ -139,6 +189,15 @@ def add_space(pid):
 @add.route("/add-4/<pid>", methods=["GET", "POST"])
 @login_required
 def add_tags(pid):
+    """
+    Add or edit the tags of the post. These tags are used to describe the amenities of the property.
+
+    @param pid - id of the post to add tags to
+
+    @return redirect to the next step in the add process.
+            If you are editing the post, redirect to the property page.
+    """
+    # Add a new post to the firestore
     if request.method == "POST":
         basics = request.form.getlist("basics")
         views = request.form.getlist("views")
@@ -155,10 +214,12 @@ def add_tags(pid):
         update_firestore(
             data, session["user"]["creation_id"] if not pid else pid, "posts"
         )
+        # Redirect to edit page if pid is not set
         if pid:
             return redirect("/edit/" + pid)
         return redirect("/add-5")
     else:
+        # This is the main page for the user s post
         if pid:
             ref = (
                 fetch_db()
@@ -166,6 +227,7 @@ def add_tags(pid):
                 .document(pid + "|" + str(session["user"]["uid"]))
             )
             doc = ref.get().to_dict()
+            # If doc is not found return 404
             if not doc:
                 return render_template(
                     "message.html", error_message="Post not found", status_code=404
@@ -179,6 +241,14 @@ def add_tags(pid):
 @add.route("/add-5/<pid>", methods=["GET", "POST"])
 @login_required
 def add_desc(pid):
+    """
+    Add or edit a post description.
+
+    @param pid - id of the post to add description to
+
+    @return redirect to the next step in the add process.
+            If you are editing the post, redirect to the property page.
+    """
     if request.method == "POST":
         value = request.form["desc"]
         data = {
@@ -187,10 +257,12 @@ def add_desc(pid):
         update_firestore(
             data, session["user"]["creation_id"] if not pid else pid, "posts"
         )
+        # Redirect to edit page if pid is not set
         if pid:
             return redirect("/edit/" + pid)
         return redirect("/add-6")
     else:
+        # This is the main page for the user s post.
         if pid:
             ref = (
                 fetch_db()
@@ -198,6 +270,7 @@ def add_desc(pid):
                 .document(pid + "|" + str(session["user"]["uid"]))
             )
             doc = ref.get().to_dict()
+            # If doc is not found return 404
             if not doc:
                 return render_template(
                     "message.html", error_message="Post not found", status_code=404
@@ -211,6 +284,14 @@ def add_desc(pid):
 @add.route("/add-6/<pid>", methods=["GET", "POST"])
 @login_required
 def add_image(pid):
+    """
+    Add or edit the images of a post.
+
+    @param pid - pid of the post to add images to
+
+    @return redirect to the next step in the add process.
+            If you are editing the post, redirect to the property page.
+    """
     if request.method == "POST":
         img_urls = upload_images(request)
         data = {
@@ -222,10 +303,12 @@ def add_image(pid):
             "posts",
             images=True,
         )
+        # Redirect to edit page if pid is not set
         if pid:
             return redirect("/edit/" + pid)
         return redirect("/add-7")
     else:
+        # This is the main page for the user s post
         if pid:
             ref = (
                 fetch_db()
@@ -233,6 +316,7 @@ def add_image(pid):
                 .document(pid + "|" + str(session["user"]["uid"]))
             )
             doc = ref.get().to_dict()
+            # If doc is not found return 404
             if not doc:
                 return render_template(
                     "message.html", error_message="Post not found", status_code=404
@@ -246,6 +330,16 @@ def add_image(pid):
 @add.route("/add-7/<pid>", methods=["GET", "POST"])
 @login_required
 def add_basics(pid):
+    """
+    Add or edit the basics of the post. These are the basic details of the property.
+    Bathrooms, bedrooms, beds etc.
+
+    @param pid - id of the post to add basics to
+
+    @return redirect to the next step in the add process.
+            If you are editing the post, redirect to the property page.
+    """
+    # Add a new post to the firestore
     if request.method == "POST":
         bedrooms = request.form["bedrooms"]
         guests = request.form["guests"]
@@ -260,10 +354,12 @@ def add_basics(pid):
         update_firestore(
             data, session["user"]["creation_id"] if not pid else pid, "posts"
         )
+        # Redirect to edit page if pid is not set
         if pid:
             return redirect("/edit/" + pid)
         return redirect("/add-8")
     else:
+        # This is the main page for the user s post
         if pid:
             ref = (
                 fetch_db()
@@ -271,6 +367,7 @@ def add_basics(pid):
                 .document(pid + "|" + str(session["user"]["uid"]))
             )
             doc = ref.get().to_dict()
+            # If doc is not found return 404
             if not doc:
                 return render_template(
                     "message.html", error_message="Post not found", status_code=404
@@ -284,6 +381,14 @@ def add_basics(pid):
 @add.route("/add-8/<pid>", methods=["GET", "POST"])
 @login_required
 def add_prices(pid):
+    """
+    Add the price to a post. You can also add the monthly or yearly discount
+
+    @param pid - pid of the post to add prices to
+
+    @return redirect to the next step in the add process.
+            If you are editing the post, redirect to the property page.
+    """
     if request.method == "POST":
         price = request.form["price"]
         month_disc = request.form["month-disc"]
@@ -298,10 +403,12 @@ def add_prices(pid):
         )
         pid = session["user"]["creation_id"]
         session["user"]["creation_id"] = ""
+        # Redirect to edit page if pid is set.
         if pid:
             return redirect("/edit/" + str(pid))
         return redirect("/view/" + str(pid))
     else:
+        # This function is used to get the post s document
         if pid:
             ref = (
                 fetch_db()
@@ -309,6 +416,7 @@ def add_prices(pid):
                 .document(pid + "|" + str(session["user"]["uid"]))
             )
             doc = ref.get().to_dict()
+            # If doc is not found return 404
             if not doc:
                 return render_template(
                     "message.html", error_message="Post not found", status_code=404

@@ -1,9 +1,16 @@
+""" This file contains the tests for the property routes """
 from unittest.mock import patch, MagicMock
 from datetime import datetime
 import pytest
 
 
-def test_view_route(client, monkeypatch, mocked_posts):
+def test_view_route(client, mocked_posts):
+    """
+    Tests the view route. This is a helper function to make sure that the client gets the correct response and returns the correct data
+
+    @param client - The client to use for the test
+    @param mocked_posts - A list of mocked posts
+    """
     with patch("firebase_admin.firestore.client") as mock_db:
         ratings_data = [
             {
@@ -37,6 +44,11 @@ def test_view_route(client, monkeypatch, mocked_posts):
 
 @pytest.mark.skip(reason="takes too long to run")
 def test_get_tips(client):
+    """
+    Make a GET request to the tips route and verify that it returns the correct data
+
+    @param client - The client to use for the test
+    """
     # Make a GET request to the route with query parameters
     response = client.get("/tips?city=New%20York&country=USA")
 
@@ -48,6 +60,12 @@ def test_get_tips(client):
 
 # Test case for the route
 def test_delete_img(auth_client, mocked_posts):
+    """
+    Test deleting an image from Firestore. This is a test function to make sure that the delete_img route works as expected
+
+    @param auth_client - An authenticated client to use for the test
+    @param mocked_posts - list of mocked posts
+    """
     # Create a test client using Flask's test_client() method
 
     # Patch the functions used in the route with the mock functions
@@ -69,6 +87,12 @@ def test_delete_img(auth_client, mocked_posts):
 
 # Test case for the route
 def test_delete_post_not_exist(auth_client, mocked_posts):
+    """
+    Test delete_post with not exist in Firestore. This is a test to make sure that we can't delete a post that does not exist
+
+    @param auth_client - An authenticated client to use for the test
+    @param mocked_posts - A list of mocked posts
+    """
     # Create a test client using Flask's test_client() method
 
     # Patch the functions used in the route with the mock functions
@@ -87,6 +111,12 @@ def test_delete_post_not_exist(auth_client, mocked_posts):
 
 # Test case for the route
 def test_delete_post(auth_client, mocked_posts):
+    """
+    Test a DELETE request with a post that is mocked. This is a test to make sure that we can delete a post that exists
+
+    @param auth_client - An authenticated client to use for the test
+    @param mocked_posts - A list of mocked posts
+    """
     # Create a test client using Flask's test_client() method
 
     # Patch the functions used in the route with the mock functions

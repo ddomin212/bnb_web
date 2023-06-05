@@ -6,6 +6,9 @@ from pytest_mock import mocker
 
 @pytest.fixture()
 def app():
+    """
+    Fixture for Flask app. This fixture is used to create a Flask app in test mode.
+    """
     from app import create_app
 
     app = create_app(testing=True)
@@ -14,11 +17,23 @@ def app():
 
 @pytest.fixture()
 def client(app):
+    """
+    Create a test client for the given app. This is a convenience function to use in tests that need to test the client.
+
+    @param app - The Flask application to test. Must be a : class : ` werkzeug. Flask ` instance.
+
+    @return A : class : ` werkzeug. TestClient ` instance that can be used to make requests
+    """
     return app.test_client()
 
 
 @pytest.fixture()
 def auth_client(app):
+    """
+    Fixture for authentificated client. This fixture is used to test authentificatied routes.
+
+    @param app - The Flask application instance to test the client with
+    """
     with app.test_client() as client:
         client.post(
             "/api/login",
@@ -34,6 +49,12 @@ def auth_client(app):
 
 @pytest.fixture()
 def mocked_posts():
+    """
+    Returns a list of mocked posts. This is useful for testing the post creation and post update functions.
+
+
+    @return A list of post dictionaries that would be returned by the database.
+    """
     return [
         {
             "id": "1",
@@ -88,11 +109,25 @@ def mocked_posts():
 
 @pytest.fixture()
 def mocked_favs():
+    """
+    Mock a dictionary of favs. This is used to test the favorites.
+
+
+    @return A dictionary of favs that would be returned by the database.
+    """
     return {"favs": ["1", "2", "3"]}
 
 
 @pytest.fixture()
 def firebase_client(mocker):
+    """
+    Mock firebase client. This is a helper function to make tests easier.
+    It patches the firebase client with a mock.
+
+    @param mocker - The Mocker to patch the client with.
+
+    @return The mocked firebase client for use in tests that require it ( not a fixture )
+    """
     client = MagicMock()
     mocker.patch("firebase_admin.firestore.client", return_value=client)
     return client

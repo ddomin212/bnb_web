@@ -1,8 +1,15 @@
+""" This module contains tests for the Stripe payment routes. """
 from unittest.mock import patch, MagicMock
 from flask import session
 
 
 def test_create_checkout_session(auth_client, mocked_posts):
+    """
+    Create a test for the create checkout session route. This test will mock the database and Stripe API calls.
+
+    @param auth_client - An authentificated client to make requests with
+    @param mocked_posts - A list of mocked posts
+    """
     # Create a test client using Flask's test_client() method
     with patch("firebase_admin.firestore.client") as firestore, patch(
         "stripe.checkout.Session.create"
@@ -32,8 +39,14 @@ def test_create_checkout_session(auth_client, mocked_posts):
 
 
 def test_success_payment(auth_client):
+    """
+    Test the success route for payment. This is a test to make sure we can get the
+    verification token and redirect to the payment page
+
+    @param auth_client - An authenticated Firestore client
+    """
     # Mock the request.args.get() method
-    with patch("firebase_admin.firestore.client") as firestore:
+    with patch("firebase_admin.firestore.client"):
         # Make a GET request to the route
         response = auth_client.get("/payment-success?session_id=testing")
         # Assert the response status code

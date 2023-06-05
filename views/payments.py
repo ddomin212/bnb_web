@@ -1,24 +1,45 @@
-from flask import Blueprint, render_template, redirect, request, session, jsonify
+""" This module contains the routes for Stripe payments. """
+import os
+import stripe
+from flask import Blueprint, render_template, redirect, request, session
 from firebase_admin import auth
 from utils.countries import countries
 from config import fetch_db
 from utils.auth import login_required
-import stripe
-import os
 
 payments = Blueprint("payments", __name__)
 
 
 @payments.context_processor
 def inject_variables():
+    """
+    Inject variables into script. This is useful for avoiding
+    having to pass variables to every single template.
+
+
+    @return dictionary of variables to inject into script as key and
+            True or False as value depending on whether or not script is
+    """
     return {"hidenav": True}
 
 
 @payments.route("/payment/<pid>", methods=["POST"])
 @login_required
 def create_checkout_session(pid):
-    self_review = fetch_db().collection("posts").where("id", "==", int(pid)).stream()
-    doc = [doc.to_dict() for doc in self_review][0]
+    """
+    Create a payment session This is used to create a booking for a property.
+    This route does not allow the user to book their own property.
+
+    @param pid - The id of the post to be booked.
+
+    @return A tuple of the form ( response status ) where response
+            is a : class : ` stripe. checkout. Session `
+    """
+    booking_property = (
+        fetch_db().collection("posts").where("id", "==", int(pid)).stream()
+    )
+    doc = [doc.to_dict() for doc in booking_property][0]
+    # If the user is the same user as the user s uid
     if doc["user_uid"] == session["user"]["uid"]:
         return (
             render_template(
@@ -37,10 +58,11 @@ def create_checkout_session(pid):
                 "quantity": 1,
             },
         ],
-        success_url=f'{os.environ["FLASK_URL"]}/payment-success?session_id={"{CHECKOUT_SESSION_ID}"}',
+        success_url=f"""{os.environ["FLASK_URL"]}/payment-
+                        success?session_id={"{CHECKOUT_SESSION_ID}"}""",
         cancel_url=f'{os.environ["FLASK_URL"]}/cancel',
     )
-    session.get("user")["verificationToken"] = payment_session.id
+    session["user"]["verificationToken"] = payment_session.id
     session["user"]["pid"] = pid
     session["user"]["from"] = request.form["from"]
     session["user"]["to"] = request.form["to"]
@@ -52,10 +74,19 @@ def create_checkout_session(pid):
 @payments.route("/payment-success", methods=["GET"])
 @login_required
 def success_payment():
+    """
+    If the user has paid successfully this view will add the user to firestore.
+    Otherwise it will return an error message to the user.
+
+
+    @return A view with success status and error message if there was an
+            error or a redirect to the payment page
+    """
     from utils.firebase import add_to_firestore
 
     payment_session_id = request.args.get("session_id")
     print(session["user"])
+    # This function is used to add a booking to firestore database.
     if payment_session_id == session["user"]["verificationToken"]:
         try:
             add_to_firestore(
@@ -77,10 +108,9 @@ def success_payment():
             ),
             200,
         )
-    else:
-        return (
-            render_template(
-                "message.html", error_message="Unauthorized access", status_code=401
-            ),
-            401,
-        )
+    return (
+        render_template(
+            "message.html", error_message="Unauthorized access", status_code=401
+        ),
+        401,
+    )

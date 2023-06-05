@@ -1,24 +1,33 @@
+""" This module contains the view functions for the property page. """
 from flask import Blueprint, render_template, redirect, request, session, jsonify
 from firebase_admin import storage
+from config import fetch_db
 from utils.firebase import get_ratings_property
 from utils.gpt import get_travel_tips
-from config import fetch_db
 from utils.auth import login_required
-import os
 
 posts = Blueprint("posts", __name__)
 
 
-@posts.route("/view/<id>")
-def view(id):
-    history = fetch_db().collection("posts").where("id", "==", int(id)).stream()
+@posts.route("/view/<pid>")
+def view(pid):
+    """
+    View a property. This is the view function for the property page. It returns a list of properties that match the
+    pid and the average rating of the reviews in the property
+
+    @param pid - The pid of the property to view
+
+    @return The HTML of the property page. This page contains the property's information, reviews, and travel tips.
+    """
+    history = fetch_db().collection("posts").where("pid", "==", int(pid)).stream()
     doc = [doc.to_dict() for doc in history][0]
     tags = []
-    print(doc)
-    [tags.append(item) for tag in [*doc["tags"]] for item in doc["tags"][tag]]
-    reviews = get_ratings_property(id)
+    # Add tags to the tags list
+    for tag in [*doc["tags"]]:
+        for item in doc["tags"][tag]:
+            tags.append(item)
+    reviews = get_ratings_property(pid)
     review_ratings = [review["rating"] for review in reviews]
-    print(reviews)
     avg_rating = (
         sum(review_ratings) / len(review_ratings) if len(review_ratings) > 0 else 0
     )
@@ -34,31 +43,56 @@ def view(id):
 
 @posts.route("/tips", methods=["GET"])
 def get_tips():
+    """
+    Get list of tips for what to visit in a city using Bing Search AI.
+
+    @return JSON with list of tips or error message Bing Search AI is not available
+    """
     city = request.args.get("city")
     country = request.args.get("country")
     travel_tips = get_travel_tips(f"{city} + {', '} + {country}")
+    # This method is used to check for tips. If there are no tips, then the service is not available
     if not travel_tips:
         return jsonify({"message": "Service not available"}), 200
     return jsonify({"travel_tips": travel_tips}), 200
 
 
-@posts.route("/delete-img/<id>/<file>", methods=["GET"])
+@posts.route("/delete-img/<pid>/<file>", methods=["GET"])
 @login_required
-def delete_img(id, file):
-    doc_ref = fetch_db().collection("posts").document(f'{id}|{session["user"]["uid"]}')
+def delete_img(pid, file):
+    """
+    Delete image from post. This will be used by JS call to delete an image from a post.
+
+    @param id - id of the post to delete the image from
+    @param file - name of the image to delete. It must be in the
+               static / uploads folder of the firebase storage.
+
+    @return redirect to Add images page after deleting the image from the post.
+    """
+    doc_ref = fetch_db().collection("posts").document(f'{pid}|{session["user"]["uid"]}')
     doc_data = doc_ref.get().to_dict()
     new_array = [x for x in doc_data["images"] if file not in x]
     doc_ref.update({"images": new_array})
     bucket = storage.bucket()
     file_to_delete = bucket.blob(f"static/uploads/{file}")
     file_to_delete.delete()
-    return redirect(f"/add-6/{id}")
+    return redirect(f"/add-6/{pid}")
 
 
-@posts.route("/delete/<id>", methods=["GET"])
+@posts.route("/delete/<pid>", methods=["GET"])
 @login_required
-def delete_post(id):
-    doc_ref = fetch_db().collection("posts").document(f'{id}|{session["user"]["uid"]}')
+def delete_post(pid):
+    """
+    Delete a post from the database. This is a view for
+    deleting a post and redirecting to the home page
+
+    @param id - The id of the post to delete
+
+    @return A template to render if the deletion was successful or a
+            404 if there was a problem with the deletion
+    """
+    doc_ref = fetch_db().collection("posts").document(f'{pid}|{session["user"]["uid"]}')
+    # If the post does not exist return 404
     if not doc_ref.get().exists:
         return (
             render_template(
