@@ -1,7 +1,6 @@
-import pytest
-from flask import session
+""" The pytest configuration file. This file is used to configure pytest and create fixtures that can be used in tests. """
 from unittest.mock import MagicMock
-from pytest_mock import mocker
+import pytest
 
 
 @pytest.fixture()

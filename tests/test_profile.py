@@ -4,7 +4,7 @@ from unittest.mock import patch, MagicMock
 from flask import session
 
 
-def test_add_description(auth_client: Any):
+def test_add_description(auth_client):
     """
     Test adding a description to the user's profile page.
 
@@ -32,7 +32,7 @@ def test_add_description(auth_client: Any):
         mock_set_claims.assert_called_once_with(uid, expected_data)
 
 
-def test_view_user(client: Any, mocked_posts: list[dict[str, Any]]):
+def test_view_user(client, mocked_posts):
     """
     Test the view_user method. This is a test for the rating_view. py script.
 
