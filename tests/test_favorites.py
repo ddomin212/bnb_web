@@ -1,74 +1,71 @@
 """ Tests for the favorites blueprint. """
-from unittest.mock import patch, Mock
+import unittest
+from unittest.mock import patch, MagicMock
+import pytest
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 
 
-def test_add_fav_success(auth_client):
-    """
-    Test that adding a favorite works as expected.
+class TestFavs(unittest.TestCase):
+    """Test class for the favorites blueprint. Default alphabetical ordering of tests at runtime will do in this case."""
 
-    @param auth_client - the fixture of an authenticated client to use
-    """
-    with patch("firebase_admin.firestore.client") as mock_fetch_db:
-        mock_firestore = Mock()
-        mock_firestore.collection.return_value.document.return_value.get.return_value.to_dict.return_value = (
-            None
+    @pytest.fixture(autouse=True)
+    def auth_client(self, auth_client):
+        """Fixture for an authenticated client available in all methods."""
+        self.auth_client = auth_client
+
+    @classmethod
+    def setUpClass(cls):
+        cls.mock_firestore = MagicMock()
+        mocked_favs = [
+            {"favs": ["4"]},
+            None,
+            {"favs": ["4", "5"]},
+            {"favs": ["4", "5"]},
+        ]
+        cls.mock_firestore.collection.return_value.document.return_value.get.side_effect = [
+            MagicMock(to_dict=MagicMock(return_value=post)) for post in mocked_favs
+        ]
+        cls.patcher = patch(
+            "firebase_admin.firestore.client", return_value=cls.mock_firestore
         )
-        mock_fetch_db.return_value = mock_firestore
-        response = auth_client.get("/fav/add/4")
-        assert response.status_code == 200
-        assert response.data == b"Success"
+        cls.patcher.start()
 
+    @classmethod
+    def tearDownClass(cls):
+        cls.patcher.stop()
 
-def test_add_fav_already_exists(auth_client):
-    """
-    Test that adding a favorite that already exists returns 400.
+    def test_add_fav_exists(self):
+        """
+        Test that adding a favorite that already exists returns 400.
 
-    @param auth_client - the fixture of an authenticated client to use
-    """
-    with patch("firebase_admin.firestore.client") as mock_fetch_db:
-        mock_firestore = Mock()
-        mock_firestore.collection.return_value.document.return_value.get.return_value.to_dict.return_value = {
-            "favs": ["4"],
-            "timestamp": SERVER_TIMESTAMP,
-        }
-        mock_fetch_db.return_value = mock_firestore
-        response = auth_client.get("/fav/add/4")
+        """
+        response = self.auth_client.get("/fav/add/4")
         assert response.status_code == 400
         assert response.data == b"Bad request"
 
+    def test_add_fav_success(self):
+        """
+        Test that adding a favorite works as expected.
 
-def test_delete_fav(auth_client):
-    """
-    Test deleting a favorite.
-
-    @param auth_client - the fixture of an authenticated client to use
-    """
-    with patch("firebase_admin.firestore.client") as mock_fetch_db:
-        mock_firestore = Mock()
-        mock_firestore.collection.return_value.document.return_value.get.return_value.to_dict.return_value = {
-            "favs": ["4", "5"]
-        }
-        mock_fetch_db.return_value = mock_firestore
-
-        response = auth_client.get("/fav/delete/5")
+        """
+        response = self.auth_client.get("/fav/add/4")
         assert response.status_code == 200
         assert response.data == b"Success"
 
+    def test_delete_fav(self):
+        """
+        Test deleting a favorite.
 
-def test_delete_fav_not_found(auth_client):
-    """
-    Test deleting a favorite that does not exist. Should return 404.
+        """
+        response = self.auth_client.get("/fav/delete/5")
+        assert response.status_code == 200
+        assert response.data == b"Success"
 
-    @param auth_client - the fixture of an authenticated client to use
-    """
-    with patch("firebase_admin.firestore.client") as mock_fetch_db:
-        mock_firestore = Mock()
-        mock_firestore.collection.return_value.document.return_value.get.return_value.to_dict.return_value = {
-            "favs": ["4", "5"]
-        }
-        mock_fetch_db.return_value = mock_firestore
+    def test_delete_fav_not_found(self):
+        """
+        Test deleting a favorite that does not exist. Should return 404.
 
-        response = auth_client.get("/fav/delete/7")
+        """
+        response = self.auth_client.get("/fav/delete/7")
         assert response.status_code == 404
         assert response.data == b"Favorite not found"

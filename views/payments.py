@@ -1,11 +1,12 @@
 """ This module contains the routes for Stripe payments. """
 import os
 import stripe
-from flask import Blueprint, render_template, redirect, request, session
-from firebase_admin import auth
-from utils.countries import countries
-from config import fetch_db
+from google.cloud.exceptions import GoogleCloudError
+from flask import Blueprint, redirect, request, session
+from utils.error import render_message
 from utils.auth import login_required
+from utils.firebase import firebase_query
+
 
 payments = Blueprint("payments", __name__)
 
@@ -35,20 +36,10 @@ def create_checkout_session(pid):
     @return A tuple of the form ( response status ) where response
             is a : class : ` stripe. checkout. Session `
     """
-    booking_property = (
-        fetch_db().collection("posts").where("id", "==", int(pid)).stream()
-    )
-    doc = [doc.to_dict() for doc in booking_property][0]
-    # If the user is the same user as the user s uid
-    if doc["user_uid"] == session["user"]["uid"]:
-        return (
-            render_template(
-                "message.html",
-                error_message="You can't rent your own property",
-                status_code=400,
-            ),
-            400,
-        )
+    with firebase_query("posts", [("id", "==", int(pid))]) as data:
+        # If the user is the same user as the user s uid
+        if data[0]["user_uid"] == session["user"]["uid"]:
+            return render_message(400, "You can't rent your own property")
     payment_session = stripe.checkout.Session.create(
         mode="subscription",
         payment_method_types=["card"],
@@ -85,7 +76,6 @@ def success_payment():
     from utils.firebase import add_to_firestore
 
     payment_session_id = request.args.get("session_id")
-    print(session["user"])
     # This function is used to add a booking to firestore database.
     if payment_session_id == session["user"]["verificationToken"]:
         try:
@@ -100,17 +90,7 @@ def success_payment():
                 },
                 "rentals",
             )
-        except Exception as e:
-            print(e)
-        return (
-            render_template(
-                "message.html", error_message="Payment successful", status_code=""
-            ),
-            200,
-        )
-    return (
-        render_template(
-            "message.html", error_message="Unauthorized access", status_code=401
-        ),
-        401,
-    )
+        except GoogleCloudError:
+            return render_message(500, "Internal server error")
+        return render_message(200, "Payment successful")
+    return render_message(401, "Unauthorized")

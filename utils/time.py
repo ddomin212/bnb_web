@@ -31,3 +31,17 @@ def format_firebase_date(dt_with_ns):
     @return A datetime. date with nanoseconds since January 1 1970.
     """
     return datetime.date(datetime(dt_with_ns.year, dt_with_ns.month, dt_with_ns.day))
+
+
+def convert_date(date):
+    """
+    Convert a date string to a datetime object. This is useful for date parsing in the case of dates that don't have a timezone ( e. g.
+
+    @param date - The date to convert. It can be in the format YYYY - MM - DD or YYYY - MM - DD.
+
+    @return A datetime object representing the date and time specified by the date string. The time is set to the minimum time
+    """
+
+    return datetime.combine(
+        datetime.strptime(date, "%Y-%m-%d").date(), datetime.min.time()
+    )

@@ -1,6 +1,6 @@
 """ The main entry point for the Flask application. """
 import os
-from flask import Flask
+from flask import Flask, render_template
 from dotenv import load_dotenv
 from views import main, authapi, posts, reviews, profile, payments, add, fav
 from config import initialize_app
@@ -32,6 +32,7 @@ def create_app(testing=False):
 
 
 app = create_app()
+
 
 # Run the app if __main__ is not the main module.
 if __name__ == "__main__":

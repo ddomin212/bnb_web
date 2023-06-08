@@ -5,7 +5,8 @@ from flask import session
 
 def test_create_checkout_session(auth_client, mocked_posts):
     """
-    Create a test for the create checkout session route. This test will mock the database and Stripe API calls.
+    Create a test for the create checkout session route.
+    This test will mock the database and Stripe API calls.
 
     @param auth_client - An authentificated client to make requests with
     @param mocked_posts - A list of mocked posts

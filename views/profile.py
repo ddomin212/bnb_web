@@ -1,8 +1,9 @@
 """ This module contains the view functions for the profile page. """
 from flask import Blueprint, render_template, redirect, request, session
+from google.cloud.exceptions import GoogleCloudError
 from firebase_admin import auth
-from config import fetch_db
-from utils.firebase import get_avg_rating, get_ratings_user
+from utils.firebase import get_avg_ratings, get_ratings_user
+from utils.firebase import firebase_query
 
 profile = Blueprint("profile", __name__)
 
@@ -20,8 +21,8 @@ def add_description():
     return redirect("/user/" + session["user"]["uid"])
 
 
-@profile.route("/user/<uid>", methods=["GET"])
-def view_user(uid):
+@profile.route("/user/<string:uid>", methods=["GET"])
+def view_user(uid: str):
     """
     View a user's posts. This is a view function that returns a the user's page.
 
@@ -33,13 +34,11 @@ def view_user(uid):
     user = auth.get_user(uid)
     try:
         desc = user.custom_claims["description"]
-    except Exception:
-        desc = ""
-
-    try:
         phone = user.custom_claims["phone"]
-    except Exception:
+    except GoogleCloudError:
+        desc = ""
         phone = ""
+
     data = {
         "displayName": user.display_name,
         "email": user.email,
@@ -48,15 +47,9 @@ def view_user(uid):
         "photoURL": user.photo_url,
         "phoneNumber": phone,
     }
-    history = fetch_db().collection("posts").where("user_uid", "==", uid).stream()
-    docs = [doc.to_dict() for doc in history]
-    # Get the average rating of all the docs in the document
-    for doc in docs:
-        print(doc)
-        doc["avg_rating"] = get_avg_rating(int(doc["id"]))
-    reviews = get_ratings_user(uid)
-    ratings = [review["rating"] for review in reviews]
-    avg_rating = sum(ratings) / len(ratings) if len(ratings) > 0 else 0
-    return render_template(
-        "profile.html", user=data, reviews=reviews, docs=docs, avg_rating=avg_rating
-    )
+    with firebase_query("posts", [("user_uid", "==", uid)]) as docs:
+        docs = get_avg_ratings(docs)
+        reviews, avg_rating = get_ratings_user(uid)
+        return render_template(
+            "profile.html", user=data, reviews=reviews, docs=docs, avg_rating=avg_rating
+        )

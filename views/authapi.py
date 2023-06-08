@@ -43,7 +43,13 @@ def api_login():
         "email": email,
         "type": typ,
         "name": name if name else "User",
+        # defualt values for testing
         "verificationToken": "testing",
+        "pid": "1000000000000000",
+        "guests": "1000000000000000",
+        "from": "1970-01-01",
+        "to": "1970-01-01",
+        "creation_id": "9999",
     }
     return jsonify({"message": "login succeded"}), 200
 

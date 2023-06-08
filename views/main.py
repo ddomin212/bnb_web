@@ -1,7 +1,8 @@
 """ This module contains the views for the various listing pages of the website. """
 from flask import Blueprint, render_template, redirect, request, session
 from utils.countries import countries
-from utils.firebase import get_avg_rating
+from utils.firebase import get_avg_ratings, firebase_query, firebase_get
+from utils.error import render_message
 from config import fetch_db
 from utils.auth import login_required
 
@@ -30,22 +31,17 @@ def index():
 
     @return A template to render the listings page for index.
     """
-    try:
-        fav_doc = (
-            fetch_db()
-            .collection("fav")
-            .document(session["user"]["uid"])
-            .get()
-            .to_dict()
-        )
-    except KeyError:
-        fav_doc = []
-    history = fetch_db().collection("posts").stream()
-    docs = [doc.to_dict() for doc in history]
-    # Calculate the average rating of each document
-    for doc in docs:
-        doc["avg_rating"] = get_avg_rating(int(doc["id"]))
-    return render_template("listings.html", docs=docs, fav_doc=fav_doc, type="index")
+    with firebase_query("posts", []) as docs:
+        print(docs)
+        docs = get_avg_ratings(docs)
+
+        if "user" not in session:
+            return render_template("listings.html", docs=docs, fav_doc=[], type="index")
+
+        with firebase_get("fav", session["user"]["uid"]) as fav_doc:
+            return render_template(
+                "listings.html", docs=docs, fav_doc=fav_doc, type="index"
+            )
 
 
 @main.route("/favorites")
@@ -58,29 +54,20 @@ def my_favs():
 
     @return A template to render the listings page for favorites.
     """
-    fav_doc = (
-        fetch_db().collection("fav").document(session["user"]["uid"]).get().to_dict()
-    )
-    # If fav_doc is not available return 404
-    if not fav_doc:
-        return (
-            render_template(
-                "message.html", message="You have no favorites yet!", status_code=404
-            ),
-            404,
-        )
-    print(fav_doc)
-    history = (
-        fetch_db()
-        .collection("posts")
-        .where("id", "in", [int(i) for i in fav_doc["favs"]])
-        .stream()
-    )
-    docs = [doc.to_dict() for doc in history]
-    # Calculate the average rating of each property
-    for doc in docs:
-        doc["avg_rating"] = get_avg_rating(int(doc["id"]))
-    return render_template("listings.html", docs=docs, fav_doc=fav_doc, type="index")
+    with firebase_get("fav", session["user"]["uid"]) as fav_doc:
+        # If fav_doc is not available return 404
+        if not fav_doc:
+            return render_message(404, "You have no favorites")
+        print(fav_doc)
+        with firebase_query(
+            "posts", [("id", "in", [int(i) for i in fav_doc["favs"]])]
+        ) as docs:
+            print(docs)
+            # Calculate the average rating of each property
+            docs = get_avg_ratings(docs)
+            return render_template(
+                "listings.html", docs=docs, fav_doc=fav_doc, type="index"
+            )
 
 
 @main.route("/my-listings")
@@ -92,18 +79,10 @@ def my_listings():
 
     @return A template to render the listings page with a listings of the current user.
     """
-    history = (
-        fetch_db()
-        .collection("posts")
-        .where("user_uid", "==", session["user"]["uid"])
-        .stream()
-    )
-    docs = [doc.to_dict() for doc in history]
-    print(docs)
-    # Calculate the average rating of each document
-    for doc in docs:
-        doc["avg_rating"] = get_avg_rating(int(doc["id"]))
-    return render_template("listings.html", docs=docs, fav_doc=None, type="rentals")
+    with firebase_query("posts", [("user_uid", "==", session["user"]["uid"])]) as docs:
+        print(docs)
+        docs = get_avg_ratings(docs)
+        return render_template("listings.html", docs=docs, fav_doc=None, type="rentals")
 
 
 @main.route("/listings/<uid>")
@@ -116,15 +95,13 @@ def user_listings(uid):
 
     @return A template for the listings of a user.
     """
-    fav_doc = (
-        fetch_db().collection("fav").document(session["user"]["uid"]).get().to_dict()
-    )
-    history = fetch_db().collection("posts").where("user_uid", "==", uid).stream()
-    docs = [doc.to_dict() for doc in history]
-    # Calculate the average rating of each document
-    for doc in docs:
-        doc["avg_rating"] = get_avg_rating(int(doc["id"]))
-    return render_template("listings.html", docs=docs, fav_doc=fav_doc, type="index")
+    with firebase_get("fav", session["user"]["uid"]) as fav_doc, firebase_query(
+        "posts", [("user_uid", "==", uid)]
+    ) as docs:
+        docs = get_avg_ratings(docs)
+        return render_template(
+            "listings.html", docs=docs, fav_doc=fav_doc, type="index"
+        )
 
 
 @main.route("/stays")
@@ -136,32 +113,24 @@ def my_stays():
 
     @return A template for the stays of a user.
     """
-    ref = (
-        fetch_db()
-        .collection("rentals")
-        .where("user_uid", "==", session["user"]["uid"])
-        .stream()
-    )
-    property_ids = [int(doc.to_dict()["property"]) for doc in ref]
-    property_ref = (
-        fetch_db().collection("posts").where("id", "in", property_ids).stream()
-    )
-    docs = [doc.to_dict() for doc in property_ref]
-    # Calculate the average rating of each document
-    for doc in docs:
-        doc["avg_rating"] = get_avg_rating(int(doc["id"]))
+    with firebase_query(
+        "rentals", [("user_uid", "==", session["user"]["uid"])]
+    ) as properties, firebase_query(
+        "posts", [("id", "in", [int(doc["property"]) for doc in properties])]
+    ) as docs, firebase_query(
+        "reviews", [("reviewer", "==", session["user"]["uid"])]
+    ) as reviews:
+        # Calculate the average rating of each document
+        docs = get_avg_ratings(docs)
+        review_ids = [int(doc["reviewed"]) for doc in reviews]
 
-    reviews_ref = (
-        fetch_db()
-        .collection("reviews")
-        .where("reviewer", "==", session["user"]["uid"])
-        .stream()
-    )
-    review_ids = [int(doc.to_dict()["reviewed"]) for doc in reviews_ref]
-
-    return render_template(
-        "listings.html", docs=docs, review_ids=review_ids, fav_doc=[], type="reviews"
-    )
+        return render_template(
+            "listings.html",
+            docs=docs,
+            review_ids=review_ids,
+            fav_doc=[],
+            type="reviews",
+        )
 
 
 # Route for the property page
@@ -182,44 +151,28 @@ def search():
     to_price = request.form["to-price"]
     # if vfrom > to return error message
     if vfrom > to:
-        return (
-            render_template(
-                "message.html", message="Invalid date range", status_code=400
-            ),
-            400,
-        )
+        return render_message(400, "Invalid date range")
     # This function is used to check if the range is greater than the current price range
     if from_price > to_price:
-        return (
-            render_template(
-                "message.html", message="Invalid price range", status_code=400
-            ),
-            400,
-        )
+        return render_message(400, "Invalid price range")
     country = request.form["country"]
     guests = int(request.form["guests"])
     print(country, vfrom, to, guests)
     # Build the Firestore query
-    query = (
-        fetch_db()
-        .collection("posts")
-        .where("country", "==", country)
-        .where("maxGuests", ">=", guests)
-    )
-
-    # Execute the query and print the results
-    docs = query.stream()
-    docs = [doc.to_dict() for doc in docs]
-    docs = [
-        doc
-        for doc in docs
-        if (doc["price"] >= int(from_price) and doc["price"] <= int(to_price))
-        and (
-            format_firebase_date(doc["from"]) <= vfrom
-            and format_firebase_date(doc["to"]) >= to
-        )
-    ]
-    # Calculate the average rating of each document
-    for doc in docs:
-        doc["avg_rating"] = get_avg_rating(int(doc["id"]))
-    return render_template("listings.html", docs=docs, type="index")
+    with firebase_query(
+        "posts", [("country", "==", country), ("maxGuests", ">=", guests)]
+    ) as docs:
+        # Filter the documents by price and date range, since we are limited in what
+        # we can do with Firestore queries
+        docs = [
+            doc
+            for doc in docs
+            if (doc["price"] >= int(from_price) and doc["price"] <= int(to_price))
+            and (
+                format_firebase_date(doc["from"]) <= vfrom
+                and format_firebase_date(doc["to"]) >= to
+            )
+        ]
+        # Calculate the average rating of each document
+        docs = get_avg_ratings(docs)
+        return render_template("listings.html", docs=docs, type="index")

@@ -1,14 +1,15 @@
 """ This file contains the views for reviews. It allows you to add, edit and delete reviews. """
-from flask import Blueprint, render_template, redirect, request, session
+from flask import Blueprint, render_template, redirect, request, session, abort
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 from utils.firebase import add_to_firestore, update_firestore
-from config import fetch_db
+from utils.firebase import firebase_query, firebase_get
+from utils.error import render_message
 
 reviews = Blueprint("reviews", __name__)
 
 
-@reviews.route("/review/add/<pid>", methods=["GET", "POST"])
-def add_review(pid):
+@reviews.route("/review/add/<int:pid>", methods=["GET", "POST"])
+def add_review(pid: int):
     """
     Add a review to a post. This is a POST and a GET.
     It does not allow you to add a review to your own post
@@ -21,49 +22,21 @@ def add_review(pid):
     """
     # This is a POST request.
     if request.method == "POST":
-        self_review = (
-            fetch_db().collection("posts").where("id", "==", int(pid)).stream()
-        )
-        try:
-            doc = [doc.to_dict() for doc in self_review][0]
-        except IndexError:
-            return (
-                render_template(
-                    "message.html",
-                    error_message="Cannot check for duplicate (no posts)",
-                    status_code=404,
-                ),
-                404,
-            )
-        # If the user is the user s uid
-        if doc["user_uid"] == session["user"]["uid"]:
-            return (
-                render_template(
-                    "message.html",
-                    error_message="You can't post a review on your own property",
-                    status_code=400,
-                ),
-                400,
-            )
-        duplicate = (
-            fetch_db()
-            .collection("reviews")
-            .where("reviewed", "==", int(pid))
-            .where("reviewer", "==", session["user"]["uid"])
-            .stream()
-        )
-        duplicates = [doc.to_dict() for doc in duplicate]
-        # If there are duplicate values in the list return a 400 error message.
-        if len(duplicates) > 0:
-            return (
-                render_template(
-                    "message.html",
-                    error_message="You can't post a review on the same property twice",
-                    status_code=400,
-                ),
-                400,
-            )
-
+        with firebase_query("posts", [("id", "==", int(pid))]) as data:
+            doc = data[0]
+            # If the user is the user s uid
+            if doc["user_uid"] == session["user"]["uid"]:
+                return render_message(
+                    400, "You can't post a review on your own property"
+                )
+        with firebase_query(
+            "reviews",
+            [("reviewed", "==", int(pid)), ("reviewer", "==", session["user"]["uid"])],
+        ) as data:
+            if len(data) > 0:
+                return render_message(
+                    400, "You can't post a review on the same property twice"
+                )
         data = {
             "rating": int(request.form["rating"]),
             "text": request.form["message"],
@@ -74,12 +47,11 @@ def add_review(pid):
         }
         add_to_firestore(data, "reviews")
         return redirect("/stays")
-    else:
-        return render_template("review.html")
+    return render_template("review.html")
 
 
-@reviews.route("/review/edit/<rid>", methods=["GET", "POST"])
-def edit_review(rid):
+@reviews.route("/review/edit/<int:rid>", methods=["GET", "POST"])
+def edit_review(rid: int):
     """
     Edit a review. This is a view that allows you to edit an existing review. The user must be logged in and have permission to edit the review.
 
@@ -97,23 +69,17 @@ def edit_review(rid):
         update_firestore(data, rid, "reviews")
         return redirect("/stays")
     else:
-        history = fetch_db().collection("reviews").where("id", "==", int(rid)).stream()
-        try:
-            doc = [doc.to_dict() for doc in history][0]
-        except IndexError:
-            return (
-                render_template(
-                    "message.html",
-                    error_message="Cannot edit a review that doesn't exist",
-                    status_code=400,
-                ),
-                400,
-            )
-        return render_template("review.html", doc=doc)
+        with firebase_query("reviews", [("id", "==", int(rid))]) as data:
+            try:
+                doc = data[0]
+                print(doc)
+            except IndexError:
+                return render_message(404, "Cannot edit a review that doesn't exist")
+            return render_template("review.html", doc=doc)
 
 
-@reviews.route("/review/delete/<rid>", methods=["GET"])
-def delete_review(rid):
+@reviews.route("/review/delete/<int:rid>", methods=["GET"])
+def delete_review(rid: int):
     """
     Delete a review from the database. If you try to delete a review that does not exist you will get a 400 error message.
 
@@ -121,18 +87,10 @@ def delete_review(rid):
 
     @return template with error message or redirect to stays if the review is deleted.
     """
-    doc_ref = (
-        fetch_db().collection("reviews").document(f'{rid}|{session["user"]["uid"]}')
-    )
-    # If the doc_ref is not a review or the user has not been deleted.
-    if doc_ref.get().to_dict() is None:
-        return (
-            render_template(
-                "message.html",
-                error_message="You can't delete a review that doesn't exist",
-                status_code=400,
-            ),
-            400,
-        )
-    doc_ref.delete()
-    return redirect("/stays")
+    with firebase_get(
+        "reviews", f'{rid}|{session["user"]["uid"]}', partial=True
+    ) as doc_ref:
+        if doc_ref.get().to_dict() is None:
+            return render_message(400, "Cannot delete a review that doesn't exist")
+        doc_ref.delete()
+        return redirect("/stays")

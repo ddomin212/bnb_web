@@ -1,248 +1,170 @@
 """ Tests for the reviews blueprint. """
-from unittest.mock import patch, Mock
+import unittest
+from unittest.mock import patch, MagicMock, Mock
+import pytest
 from flask import session
 
 
-def test_add_review_success(auth_client):
+class TestReviews(unittest.TestCase):
+    """Test class for the reviews blueprint. Numbering the methods is important
+    for the order of execution, because we use the side_effect parameter for the mock.
     """
-    Test adding a review with valid data.
 
-    @param auth_client - An authenticated client to use for testing
-    """
-    # Mock the Firestore queries
-    with patch("firebase_admin.firestore.client") as firestore_mock:
-        # Mock the database query to return posts for the user's favorites
-        mock_history = [
-            {
-                "id": "1",
-                "city": "Tirana",
-                "country": "Albania",
-                "price": 10,
-                "user_uid": "123589",
-            }
-        ]
-        firestore_mock.return_value.collection.return_value.where.return_value.stream.return_value = [
-            Mock(to_dict=Mock(return_value=post)) for post in mock_history
-        ]
+    @pytest.fixture(autouse=True)
+    def auth_client(self, auth_client):
+        """Fixture for an authenticated client available in all methods."""
+        self.auth_client = auth_client
 
-        mock_reviews = []
-        firestore_mock.return_value.collection.return_value.document.return_value.collection.return_value.where.return_value.stream.return_value = [
-            Mock(to_dict=Mock(return_value=review)) for review in mock_reviews
-        ]
-        # Make a GET request to render the review form
-        response = auth_client.post(
-            "/review/add/1", data={"rating": "4", "message": "Lorem Ipsum"}
-        )
-        # Verify that the response is a redirect
-        assert response.status_code == 302
-        assert response.headers["Location"] == "/stays"
-    # Make a GET request to render the review form
-    response = auth_client.get("/review/add/123")
-
-    # Verify that the response contains the review form
-    assert response.status_code == 200
-    assert b'<form method="post" id="review-form"' in response.data
-
-
-def test_add_review_self(auth_client):
-    """
-    Test adding a review to the current user's property.
-
-    @param auth_client - An authenticated client to use for testing
-    """
-    # Mock the Firestore queries
-    with patch("firebase_admin.firestore.client") as firestore_mock:
-        # Mock the database query to return posts for the user's favorites
-        mock_history = [
-            {
-                "id": "1",
-                "city": "Tirana",
-                "country": "Albania",
-                "price": 10,
-                "user_uid": session["user"]["uid"],
-            }
-        ]
-        firestore_mock.return_value.collection.return_value.where.return_value.stream.return_value = [
-            Mock(to_dict=Mock(return_value=post)) for post in mock_history
-        ]
-
-        mock_reviews = []
-        firestore_mock.return_value.collection.return_value.document.return_value.collection.return_value.where.return_value.stream.return_value = [
-            Mock(to_dict=Mock(return_value=review)) for review in mock_reviews
-        ]
-        # Make a GET request to render the review form
-        response = auth_client.post(
-            "/review/add/1", data={"rating": "4", "message": "Lorem Ipsum"}
-        )
-        # Verify that the response is a redirect
-        assert response.status_code == 400
-        assert b"post a review on your own property" in response.data
-
-
-def test_add_review_duplicate(auth_client):
-    """
-    Test adding a review that already exists.
-
-    @param auth_client - An authenticated client to use for testing
-    """
-    # Mock the Firestore queries
-    with patch("firebase_admin.firestore.client") as firestore_mock:
-        # Mock the database query to return posts for the user's favorites
-        mock_history = [
-            {
-                "id": 1,
-                "city": "Tirana",
-                "country": "Albania",
-                "price": 10,
-                "user_uid": "12358",
-            }
-        ]
-        firestore_mock.return_value.collection.return_value.where.return_value.stream.return_value = [
-            Mock(to_dict=Mock(return_value=post)) for post in mock_history
-        ]
-
-        mock_reviews = [
+    @classmethod
+    def setUpClass(cls):
+        cls.mock_firestore = MagicMock()
+        mocked_post = {
+            "id": "1",
+            "city": "Tirana",
+            "country": "Albania",
+            "price": 10,
+        }
+        mocked_review = [
             {
                 "rating": "4",
-                "message": "Lorem Ipsum",
-                "reviewer": session["user"]["uid"],
+                "id": "4",
+                "text": "Lorem Ipsum",
+                "reviewer": "1234",
                 "reviewed": 1,
             }
         ]
-        firestore_mock.return_value.collection.return_value.where.return_value.where.return_value.stream.return_value = [
-            Mock(to_dict=Mock(return_value=review)) for review in mock_reviews
+        empty_review = []
+        cls.mock_firestore.collection.return_value.where.return_value.stream.side_effect = [
+            [
+                MagicMock(to_dict=MagicMock(return_value=post))
+                for post in [{**mocked_post, "user_uid": "123589"}]
+            ],
+            [
+                MagicMock(to_dict=MagicMock(return_value=post))
+                for post in [{**mocked_post, "user_uid": "1234"}]
+            ],
+            [
+                MagicMock(to_dict=MagicMock(return_value=post))
+                for post in [{**mocked_post, "user_uid": "12358"}]
+            ],
+            [MagicMock(to_dict=MagicMock(return_value=post)) for post in mocked_review],
+            [MagicMock(to_dict=MagicMock(return_value=post)) for post in empty_review],
         ]
-        # Make a GET request to render the review form
-        response = auth_client.post(
+        cls.mock_firestore.collection.return_value.document.return_value.collection.return_value.where.return_value.stream.return_value = [
+            Mock(to_dict=Mock(return_value=review)) for review in empty_review
+        ]
+        cls.mock_firestore.collection.return_value.where.return_value.where.return_value.stream.side_effect = [
+            [MagicMock(to_dict=MagicMock(return_value=post)) for post in empty_review],
+            [MagicMock(to_dict=MagicMock(return_value=post)) for post in mocked_review],
+        ]
+        cls.mock_firestore.collection.return_value.document.return_value.get.side_effect = [
+            Mock(to_dict=Mock(return_value=mocked_review[0])),
+            Mock(to_dict=Mock(return_value=None)),
+        ]
+        cls.patcher = patch(
+            "firebase_admin.firestore.client", return_value=cls.mock_firestore
+        )
+        cls.patcher.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.patcher.stop()
+
+    def test_01_add_review_success(self):
+        """
+        Test adding a review with valid data.
+
+        @param auth_client - An authenticated client to use for testing
+        """
+        response = self.auth_client.post(
+            "/review/add/1", data={"rating": "4", "message": "Lorem Ipsum"}
+        )
+        assert response.status_code == 302
+        assert response.headers["Location"] == "/stays"
+
+        response = self.auth_client.get("/review/add/1")
+
+        assert response.status_code == 200
+        assert b'<form method="post" id="review-form"' in response.data
+
+    def test_02_add_review_self(self):
+        """
+        Test adding a review to the current user's property.
+
+        @param auth_client - An authenticated client to use for testing
+        """
+        response = self.auth_client.post(
+            "/review/add/1", data={"rating": "4", "message": "Lorem Ipsum"}
+        )
+        assert response.status_code == 400
+        assert b"post a review on your own property" in response.data
+
+    def test_03_add_review_duplicate(self):
+        """
+        Test adding a review that already exists.
+
+        @param auth_client - An authenticated client to use for testing
+        """
+        # Mock the Firestore queries
+        response = self.auth_client.post(
             "/review/add/1", data={"rating": "4", "message": "Lorem Ipsum"}
         )
         # Verify that the response is a redirect
         assert response.status_code == 400
         assert b"post a review on the same property twice" in response.data
 
+    def test_04_edit_review_post(self):
+        """
+        Test editing a review with valid data.
 
-def test_edit_review_post(auth_client):
-    """
-    Test editing a review with valid data.
+        @param auth_client - An authenticated client to use for testing
+        """
 
-    @param auth_client - An authenticated client to use for testing
-    """
-    # Mock the Firestore queries
-    with patch("firebase_admin.firestore.client") as firestore_mock:
-        # Mock the database query to return posts for the user's favorites
-        mock_history = [
-            {
-                "id": "1",
-                "city": "Tirana",
-                "country": "Albania",
-                "price": 10,
-                "user_uid": session["user"]["uid"],
-            }
-        ]
-        firestore_mock.return_value.collection.return_value.where.return_value.stream.return_value = [
-            Mock(to_dict=Mock(return_value=post)) for post in mock_history
-        ]
-
-        mock_reviews = [
-            {
-                "rating": "4",
-                "id": 4,
-                "message": "Lorem Ipsum",
-                "reviewer": session["user"]["uid"],
-                "reviewed": 1,
-            }
-        ]
-        firestore_mock.return_value.collection.return_value.where.return_value.where.return_value.stream.return_value = [
-            Mock(to_dict=Mock(return_value=review)) for review in mock_reviews
-        ]
-        # Make a GET request to render the review form
-        response = auth_client.post(
+        response = self.auth_client.post(
             "/review/edit/4", data={"rating": "3", "message": "Lorem Ipsum"}
         )
-        # Verify that the response is a redirect
 
         assert response.status_code == 302
         assert response.headers["Location"] == "/stays"
-        # Make a GET request to render the review form
 
+    def test_05_edit_review_get(self):
+        """
+        Test the edit review form.
 
-def test_edit_review_get(auth_client):
-    """
-    Test the edit review form.
-
-    @param auth_client - An authenticated client to use for testing
-    """
-    with patch("firebase_admin.firestore.client") as firestore_mock:
-        mock_reviews = [
-            {
-                "rating": "4",
-                "id": 4,
-                "text": "Lorem Ipsum",
-                "reviewer": session["user"]["uid"],
-                "reviewed": 1,
-            }
-        ]
-        firestore_mock.return_value.collection.return_value.where.return_value.stream.return_value = [
-            Mock(to_dict=Mock(return_value=review)) for review in mock_reviews
-        ]
-        response = auth_client.get("/review/edit/4")
-        # print(response.data.decode("utf-8"))
-        # Verify that the response contains the review form
+        @param auth_client - An authenticated client to use for testing
+        """
+        response = self.auth_client.get("/review/edit/4")
         assert response.status_code == 200
+        print(response.data.decode("utf-8"))
         assert b"Lorem Ipsum</textarea" in response.data
         assert b'const valueToSelect = "4"' in response.data
 
+    def test_06_edit_review_get_not_exist(self):
+        """
+        Test that editing a review that does not exist returns a 400 error.
 
-def test_edit_review_get_not_exist(auth_client):
-    """
-    Test that editing a review that does not exist returns a 400 error.
-
-    @param auth_client - An authenticated client to use for testing.
-    """
-    with patch("firebase_admin.firestore.client") as firestore_mock:
-        mock_reviews = []
-        firestore_mock.return_value.collection.return_value.where.return_value.stream.return_value = [
-            Mock(to_dict=Mock(return_value=review)) for review in mock_reviews
-        ]
-        response = auth_client.get("/review/edit/4")
-        assert response.status_code == 400
+        @param auth_client - An authenticated client to use for testing.
+        """
+        response = self.auth_client.get("/review/edit/4")
+        assert response.status_code == 404
         assert b"Cannot edit a review that" in response.data
 
+    def test_07_delete_review(self):
+        """
+        Test deleting a review.
 
-def test_delete_review(auth_client):
-    """
-    Test deleting a review.
-
-    @param auth_client - An authenticated client to use for testing.
-    """
-    with patch("firebase_admin.firestore.client") as firestore_mock:
-        mock_reviews = [
-            {
-                "rating": "4",
-                "id": 4,
-                "text": "Lorem Ipsum",
-                "reviewer": session["user"]["uid"],
-                "reviewed": 1,
-            }
-        ]
-        firestore_mock.return_value.collection.return_value.document.return_value.get.return_value.to_dict.return_value = [
-            Mock(to_dict=Mock(return_value=review)) for review in mock_reviews
-        ]
-        response = auth_client.get("/review/delete/4")
+        @param auth_client - An authenticated client to use for testing.
+        """
+        response = self.auth_client.get("/review/delete/4")
         assert response.status_code == 302
         assert response.headers["Location"] == "/stays"
 
+    def test_08_delete_review_not_exist(self):
+        """
+        Test that delete a review that does not exist returns 400 error.
 
-def test_delete_review_not_exist(auth_client):
-    """
-    Test that delete a review that does not exist returns 400 error.
-
-    @param auth_client - An authenticated client to use for testing.
-    """
-    with patch("firebase_admin.firestore.client") as firestore_mock:
-        firestore_mock.return_value.collection.return_value.document.return_value.get.return_value.to_dict.return_value = (
-            None
-        )
-        response = auth_client.get("/review/delete/4")
+        @param auth_client - An authenticated client to use for testing.
+        """
+        response = self.auth_client.get("/review/delete/7")
         assert response.status_code == 400
         assert b"delete a review that doesn" in response.data

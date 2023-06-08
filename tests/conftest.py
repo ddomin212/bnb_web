@@ -1,6 +1,7 @@
 """ The pytest configuration file. This file is used to configure pytest and create fixtures that can be used in tests. """
 from unittest.mock import MagicMock
 import pytest
+from utils.time import convert_date
 
 
 @pytest.fixture()
@@ -72,6 +73,9 @@ def mocked_posts():
                 "standout": ["Pool", "Gym"],
                 "views": ["Ocean view", "Mountain view"],
             },
+            "type": "apartment",
+            "from": convert_date("2022-01-01"),
+            "to": convert_date("2022-05-01"),
         },
         {
             "id": "2",
@@ -106,7 +110,7 @@ def mocked_posts():
     ]
 
 
-@pytest.fixture()
+@pytest.fixture(scope="class")
 def mocked_favs():
     """
     Mock a dictionary of favs. This is used to test the favorites.
@@ -130,3 +134,6 @@ def firebase_client(mocker):
     client = MagicMock()
     mocker.patch("firebase_admin.firestore.client", return_value=client)
     return client
+
+
+# TODO! Create tests in class format. This is a better way to organize tests.
