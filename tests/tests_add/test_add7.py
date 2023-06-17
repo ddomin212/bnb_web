@@ -2,7 +2,11 @@ from unittest.mock import patch, MagicMock
 
 
 def test_add_7_get(auth_client):
-    # Make a GET request to the route with parameters
+    """
+    Test the page for the property housing info.
+
+    @param auth_client - The client to make requests to the server
+    """
     response = auth_client.get("/add-7")
 
     # Assert the response status code
@@ -14,7 +18,11 @@ def test_add_7_get(auth_client):
 
 
 def test_add_7_post(auth_client):
-    # Make a GET request to the route with parameters
+    """
+    Test the form for the property housing info.
+
+    @param auth_client - The client to make requests to the server
+    """
     with patch("firebase_admin.firestore.client"):
         response = auth_client.post(
             "/add-7",
@@ -32,11 +40,17 @@ def test_add_7_post(auth_client):
 
 
 def test_add_7_edit_get(auth_client, mocked_posts):
+    """
+    Test the edit page for a property housing info.
+
+    @param auth_client - The client to make requests to the server
+    @param mocked_posts - The mocked posts to return from the database
+    """
     with patch("firebase_admin.firestore.client") as firestore:
         firestore.return_value.collection.return_value.document.return_value.get.return_value = MagicMock(
             to_dict=lambda: mocked_posts[0]
         )
-        # Make a GET request to the route with parameters
+
         response = auth_client.get("/add-7/1")
 
         # Assert the response status code
@@ -49,7 +63,11 @@ def test_add_7_edit_get(auth_client, mocked_posts):
 
 
 def test_add_7_edit_post(auth_client):
-    # Make a GET request to the route with parameters
+    """
+    Test the edit form for the property housing info.
+
+    @param auth_client - The client to make requests to the server
+    """
     with patch("firebase_admin.firestore.client"):
         response = auth_client.post(
             "/add-7/1",

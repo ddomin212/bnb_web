@@ -2,6 +2,12 @@ from unittest.mock import patch, MagicMock
 
 
 def test_add_1_edit_get(auth_client, mocked_posts):
+    """
+    Test the edit page for a property location.
+
+    @param auth_client - The client to make requests to the server
+    @param mocked_posts - The mocked posts to return from the database
+    """
     with patch("firebase_admin.firestore.client") as firestore:
         firestore.return_value.collection.return_value.document.return_value.get.return_value = MagicMock(
             to_dict=lambda: mocked_posts[0]
@@ -15,6 +21,11 @@ def test_add_1_edit_get(auth_client, mocked_posts):
 
 
 def test_add_1_get(auth_client):
+    """
+    Test the page for a property location.
+
+    @param auth_client - The client to make requests to the server
+    """
     # Make a GET request to the route with parameters
     response = auth_client.get("/add-1")
 
@@ -24,6 +35,11 @@ def test_add_1_get(auth_client):
 
 
 def test_add_1_edit_post(auth_client):
+    """
+    Test editing the form for a property location.
+
+    @param auth_client - The client to make requests to the server
+    """
     with patch("firebase_admin.firestore.client"):
         response = auth_client.post(
             "/add-1/1",
@@ -39,7 +55,11 @@ def test_add_1_edit_post(auth_client):
 
 
 def test_add_1_post(auth_client):
-    # Make a GET request to the route with parameters
+    """
+    Test the form for a property location.
+
+    @param auth_client - The client to make requests to the server
+    """
     response = auth_client.post(
         "/add-1",
         data={
