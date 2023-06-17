@@ -3,6 +3,7 @@ import os
 import stripe
 from .firebase import initialize_firebase
 from .redis import initialize_redis
+from .papertrail import initialize_papertrail
 
 
 def initialize_app(app, testing=False):
@@ -33,3 +34,4 @@ def initialize_app(app, testing=False):
     if not testing:
         initialize_redis(app)
         initialize_firebase()
+    initialize_papertrail()

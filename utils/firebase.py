@@ -27,7 +27,7 @@ def firebase_query(collection: str, query: List[Tuple[str, str, Any]]):
         docs = fetch_db().collection(collection)
         # Find all documents that match the given query.
         for q in query:
-            docs = docs.where(*q)
+            docs = docs.where(q[0], q[1], int(q[2]))
         docs = docs.stream()
         yield [doc.to_dict() for doc in docs]
     except GoogleCloudError:
@@ -92,7 +92,9 @@ def upload_images(request):
         if image_file and allowed_file(image_file.filename):
             filename = secure_filename(image_file.filename)
             image_file.save("/".join([app.config["UPLOAD_FOLDER"], filename]))
-            url = upload_to_bucket("/".join([app.config["UPLOAD_FOLDER"], filename]))
+            url = upload_to_bucket(
+                "/".join([app.config["UPLOAD_FOLDER"], filename])
+            )
             os.remove("/".join([app.config["UPLOAD_FOLDER"], filename]))
             urls.append(url)
         else:
@@ -119,13 +121,19 @@ def update_images(request, id):
         if image_file and allowed_file(image_file.filename):
             filename = secure_filename(image_file.filename)
             image_file.save("/".join([app.config["UPLOAD_FOLDER"], filename]))
-            url = upload_to_bucket("/".join([app.config["UPLOAD_FOLDER"], filename]))
+            url = upload_to_bucket(
+                "/".join([app.config["UPLOAD_FOLDER"], filename])
+            )
             os.remove("/".join([app.config["UPLOAD_FOLDER"], filename]))
             urls.append(url)
         else:
             return []
 
-    doc_ref = fetch_db().collection("posts").document(f'{id}|{session["user"]["uid"]}')
+    doc_ref = (
+        fetch_db()
+        .collection("posts")
+        .document(f'{id}|{session["user"]["uid"]}')
+    )
     doc_data = doc_ref.get().to_dict()
     new_urls = doc_data["images"] + urls
 
@@ -145,12 +153,17 @@ def get_avg_rating(id):
     # Returns a list of all the reviews that have been reviewed.
     try:
         reviews_ref = (
-            fetch_db().collection("reviews").where("reviewed", "==", id).stream()
+            fetch_db()
+            .collection("reviews")
+            .where("reviewed", "==", id)
+            .stream()
         )
         review_ids = [int(doc.to_dict()["rating"]) for doc in reviews_ref]
     except GoogleCloudError:
         return None
-    avg_rating = sum(review_ids) / len(review_ids) if len(review_ids) > 0 else None
+    avg_rating = (
+        sum(review_ids) / len(review_ids) if len(review_ids) > 0 else None
+    )
     return avg_rating
 
 
@@ -179,7 +192,10 @@ def get_ratings_property(id):
     @return A list of dictionaries that contain information about the propetry reviews.
     """
     reviews_ref = (
-        fetch_db().collection("reviews").where("reviewed", "==", int(id)).stream()
+        fetch_db()
+        .collection("reviews")
+        .where("reviewed", "==", int(id))
+        .stream()
     )
     ratings = [doc.to_dict() for doc in reviews_ref]
     return ratings
@@ -196,7 +212,12 @@ def get_ratings_user(uid):
     empty list if there are no ratings for the user.
     """
     try:
-        posts_ref = fetch_db().collection("posts").where("user_uid", "==", uid).stream()
+        posts_ref = (
+            fetch_db()
+            .collection("posts")
+            .where("user_uid", "==", uid)
+            .stream()
+        )
         user_posts = [int(doc.to_dict()["id"]) for doc in posts_ref]
         reviews_ref = (
             fetch_db()
@@ -239,7 +260,9 @@ def update_firestore(data, id, collection, images=False):
     """
     # Get a reference to the document collection
     doc_ref = (
-        fetch_db().collection(collection).document(f'{id}|{session["user"]["uid"]}')
+        fetch_db()
+        .collection(collection)
+        .document(f'{id}|{session["user"]["uid"]}')
     )
     # Add images to the images array
     if images is True:
@@ -296,4 +319,7 @@ def allowed_file(filename):
     extension must be lower case
     """
     allowed_extensions = ["png", "jpg", "jpeg", "gif", "webp"]
-    return "." in filename and filename.rsplit(".", 1)[1].lower() in allowed_extensions
+    return (
+        "." in filename
+        and filename.rsplit(".", 1)[1].lower() in allowed_extensions
+    )

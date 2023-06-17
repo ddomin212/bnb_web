@@ -1,5 +1,12 @@
 """ This module contains the view functions for the property page. """
-from flask import Blueprint, render_template, redirect, request, session, jsonify
+from flask import (
+    Blueprint,
+    render_template,
+    redirect,
+    request,
+    session,
+    jsonify,
+)
 from firebase_admin import storage
 from utils.firebase import get_ratings_property
 from utils.gpt import get_travel_tips
@@ -29,7 +36,9 @@ def view(pid: int):
         reviews = get_ratings_property(pid)
         review_ratings = [review["rating"] for review in reviews]
         avg_rating = (
-            sum(review_ratings) / len(review_ratings) if len(review_ratings) > 0 else 0
+            sum(review_ratings) / len(review_ratings)
+            if len(review_ratings) > 0
+            else 0
         )
         return render_template(
             "property.html",

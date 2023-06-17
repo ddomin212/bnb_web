@@ -32,11 +32,12 @@ def index():
     @return A template to render the listings page for index.
     """
     with firebase_query("posts", []) as docs:
-        print(docs)
         docs = get_avg_ratings(docs)
 
         if "user" not in session:
-            return render_template("listings.html", docs=docs, fav_doc=[], type="index")
+            return render_template(
+                "listings.html", docs=docs, fav_doc=[], type="index"
+            )
 
         with firebase_get("fav", session["user"]["uid"]) as fav_doc:
             return render_template(
@@ -79,10 +80,14 @@ def my_listings():
 
     @return A template to render the listings page with a listings of the current user.
     """
-    with firebase_query("posts", [("user_uid", "==", session["user"]["uid"])]) as docs:
+    with firebase_query(
+        "posts", [("user_uid", "==", session["user"]["uid"])]
+    ) as docs:
         print(docs)
         docs = get_avg_ratings(docs)
-        return render_template("listings.html", docs=docs, fav_doc=None, type="rentals")
+        return render_template(
+            "listings.html", docs=docs, fav_doc=None, type="rentals"
+        )
 
 
 @main.route("/listings/<uid>")
@@ -95,9 +100,9 @@ def user_listings(uid):
 
     @return A template for the listings of a user.
     """
-    with firebase_get("fav", session["user"]["uid"]) as fav_doc, firebase_query(
-        "posts", [("user_uid", "==", uid)]
-    ) as docs:
+    with firebase_get(
+        "fav", session["user"]["uid"]
+    ) as fav_doc, firebase_query("posts", [("user_uid", "==", uid)]) as docs:
         docs = get_avg_ratings(docs)
         return render_template(
             "listings.html", docs=docs, fav_doc=fav_doc, type="index"
@@ -167,7 +172,10 @@ def search():
         docs = [
             doc
             for doc in docs
-            if (doc["price"] >= int(from_price) and doc["price"] <= int(to_price))
+            if (
+                doc["price"] >= int(from_price)
+                and doc["price"] <= int(to_price)
+            )
             and (
                 format_firebase_date(doc["from"]) <= vfrom
                 and format_firebase_date(doc["to"]) >= to
