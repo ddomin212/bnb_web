@@ -1,12 +1,14 @@
 """ This file contains the API endpoints for the authentication of the user. """
 from flask import (
     Blueprint,
-    render_template,
     jsonify,
+    redirect,
+    render_template,
     request,
     session,
-    redirect,
 )
+
+from utils.auth import set_user_session
 
 authapi = Blueprint("authapi", __name__)
 
@@ -38,19 +40,7 @@ def api_login():
         typ = request.json["type"]
     except KeyError:
         return jsonify({"message": "missing some request data"}), 400
-    session["user"] = {
-        "uid": uid,
-        "email": email,
-        "type": typ,
-        "name": name if name else "User",
-        # defualt values for testing
-        "verificationToken": "testing",
-        "pid": "1000000000000000",
-        "guests": "1000000000000000",
-        "from": "1970-01-01",
-        "to": "1970-01-01",
-        "creation_id": "9999",
-    }
+    set_user_session(uid, email, typ, name)
     return jsonify({"message": "login succeded"}), 200
 
 

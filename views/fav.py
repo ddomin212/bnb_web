@@ -1,9 +1,11 @@
 """ This module contains the routes for adding and deleting favorites. """
 from flask import Blueprint, session
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
-from utils.firebase import update_favorites, add_favorite, firebase_get
+
 from config import fetch_db
 from utils.auth import login_required
+from utils.firebase import add_favorite, firebase_get, update_favorites
+from utils.render import render_message
 
 fav = Blueprint("fav", __name__)
 
@@ -24,7 +26,10 @@ def add_fav(pid):
             # This method is used to check if the pid is in fav_doc
             if pid in fav_doc["favs"]:
                 return "Bad request", 400
-            data = {"favs": fav_doc["favs"] + [pid], "timestamp": SERVER_TIMESTAMP}
+            data = {
+                "favs": fav_doc["favs"] + [pid],
+                "timestamp": SERVER_TIMESTAMP,
+            }
             update_favorites(data)
             return "Success", 200
         else:

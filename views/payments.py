@@ -1,12 +1,13 @@
 """ This module contains the routes for Stripe payments. """
 import os
-import stripe
-from google.cloud.exceptions import GoogleCloudError
-from flask import Blueprint, redirect, request, session
-from utils.error import render_message
-from utils.auth import login_required
-from utils.firebase import firebase_query
 
+import stripe
+from flask import Blueprint, redirect, request, session
+from google.cloud.exceptions import GoogleCloudError
+
+from utils.auth import login_required
+from utils.checks import check_self
+from utils.render import render_message
 
 payments = Blueprint("payments", __name__)
 
@@ -36,10 +37,7 @@ def create_checkout_session(pid):
     @return A tuple of the form ( response status ) where response
             is a : class : ` stripe. checkout. Session `
     """
-    with firebase_query("posts", [("id", "==", int(pid))]) as data:
-        # If the user is the same user as the user s uid
-        if data[0]["user_uid"] == session["user"]["uid"]:
-            return render_message(400, "You can't rent your own property")
+    check_self(pid)
     payment_session = stripe.checkout.Session.create(
         mode="subscription",
         payment_method_types=["card"],
@@ -58,7 +56,6 @@ def create_checkout_session(pid):
     session["user"]["from"] = request.form["from"]
     session["user"]["to"] = request.form["to"]
     session["user"]["guests"] = request.form["guests"]
-    print(session["user"])
     return redirect(payment_session.url)
 
 

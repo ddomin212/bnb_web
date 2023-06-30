@@ -1,10 +1,11 @@
 """ This module contains the views for the various listing pages of the website. """
-from flask import Blueprint, render_template, redirect, request, session
-from utils.countries import countries
-from utils.firebase import get_avg_ratings, firebase_query, firebase_get
-from utils.error import render_message
-from config import fetch_db
+from flask import Blueprint, redirect, render_template, request, session
+
 from utils.auth import login_required
+from utils.countries import countries
+from utils.firebase import firebase_get, firebase_query, get_avg_ratings
+from utils.render import render_message
+from utils.search import get_search_params
 
 main = Blueprint("main", __name__)
 
@@ -59,11 +60,9 @@ def my_favs():
         # If fav_doc is not available return 404
         if not fav_doc:
             return render_message(404, "You have no favorites")
-        print(fav_doc)
         with firebase_query(
             "posts", [("id", "in", [int(i) for i in fav_doc["favs"]])]
         ) as docs:
-            print(docs)
             # Calculate the average rating of each property
             docs = get_avg_ratings(docs)
             return render_template(
@@ -83,7 +82,6 @@ def my_listings():
     with firebase_query(
         "posts", [("user_uid", "==", session["user"]["uid"])]
     ) as docs:
-        print(docs)
         docs = get_avg_ratings(docs)
         return render_template(
             "listings.html", docs=docs, fav_doc=None, type="rentals"
@@ -149,20 +147,11 @@ def search():
 
     @return A list of posts that match the search criteria. The list is sorted by price and with the most popular posts first
     """
-    from utils.time import format_dates, format_firebase_date
+    from utils.time import format_firebase_date
 
-    vfrom, to = format_dates(request.form["from"], request.form["to"])
-    from_price = request.form["from-price"]
-    to_price = request.form["to-price"]
-    # if vfrom > to return error message
-    if vfrom > to:
-        return render_message(400, "Invalid date range")
-    # This function is used to check if the range is greater than the current price range
-    if from_price > to_price:
-        return render_message(400, "Invalid price range")
-    country = request.form["country"]
-    guests = int(request.form["guests"])
-    print(country, vfrom, to, guests)
+    vfrom, to, from_price, to_price, country, guests = get_search_params(
+        request
+    )
     # Build the Firestore query
     with firebase_query(
         "posts", [("country", "==", country), ("maxGuests", ">=", guests)]

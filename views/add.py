@@ -1,15 +1,21 @@
 """ This module contains all the routes related to adding a new post. """
-from flask import Blueprint, render_template, redirect, request, session, jsonify
+from flask import Blueprint, redirect, render_template, request, session
+
+from utils.add import (
+    address_data,
+    basic_data,
+    price_data,
+    tags_data,
+    type_date_data,
+)
+from utils.auth import login_required
 from utils.firebase import (
     add_to_firestore,
+    firebase_get,
     update_firestore,
     upload_images,
-    firebase_get,
-    firebase_query,
 )
-from config import fetch_db
-from utils.auth import login_required
-from utils.error import render_message
+from utils.render import render_message
 from utils.time import convert_date
 
 add = Blueprint("add", __name__)
@@ -63,31 +69,7 @@ def add_loc(pid: int):
     """
     # This is the main entry point for the firestore.
     if request.method == "POST":
-        adress_line = request.form["address_line"].strip().split(",")
-        apt = request.form["address_line2"].strip()
-        district = None
-        # This function is used to display the address
-        if len(adress_line) == 4:
-            loc = adress_line[0]
-            city = adress_line[1]
-            district = adress_line[2]
-            country = adress_line[3]
-        elif len(adress_line) == 3:
-            loc = adress_line[0]
-            city = adress_line[1]
-            country = adress_line[2]
-        else:
-            return render_message(
-                400, "Please enter a full address (city, state, country...)"
-            )
-        data = {
-            "loc": loc,
-            "city": city,
-            "district": district if district else "None",
-            "country": country,
-            "apt": apt if apt else "None",
-            "user_uid": session["user"]["uid"],
-        }
+        data = address_data(request)
         # Add or edit a user s post.
         if pid:
             update_firestore(data, pid, "posts")
@@ -104,7 +86,7 @@ def add_loc(pid: int):
 @login_required
 def add_type(pid: int):
     """
-    Add or edit a type of a post. This can be an apartment, house, exprience and so on.
+    Add or edit a type of a post. This can be an apartment, house, exprience and so on. Also includes the dates of availability.
 
     @param pid - pid of the post to add type to
 
@@ -112,16 +94,9 @@ def add_type(pid: int):
             If you are editing the post, redirect to the property page.
     """
 
-    # POST POST request. form type from date to date
+    # POST request. form type from date to date
     if request.method == "POST":
-        typ = request.form["type"].strip()
-        vfrom = convert_date(request.form["from"])
-        to = convert_date(request.form["to"])
-        data = {
-            "type": typ,
-            "from": vfrom,
-            "to": to,
-        }
+        data = type_date_data(request)
         update_firestore(
             data, session["user"]["creation_id"] if not pid else pid, "posts"
         )
@@ -175,18 +150,7 @@ def add_tags(pid: int):
     """
     # Add a new post to the firestore
     if request.method == "POST":
-        basics = request.form.getlist("basics")
-        views = request.form.getlist("views")
-        safety = request.form.getlist("safety")
-        standout = request.form.getlist("standout")
-        data = {
-            "tags": {
-                "basics": basics,
-                "views": views,
-                "safety": safety,
-                "standout": standout,
-            },
-        }
+        data = tags_data(request)
         update_firestore(
             data, session["user"]["creation_id"] if not pid else pid, "posts"
         )
@@ -267,16 +231,7 @@ def add_basics(pid: int):
     """
     # Add a new post to the firestore
     if request.method == "POST":
-        bedrooms = request.form["bedrooms"]
-        guests = request.form["guests"]
-        baths = request.form["baths"]
-        beds = request.form["beds"]
-        data = {
-            "bedrooms": bedrooms,
-            "baths": baths,
-            "guests": guests,
-            "beds": beds,
-        }
+        data = basic_data(request)
         update_firestore(
             data, session["user"]["creation_id"] if not pid else pid, "posts"
         )
@@ -299,20 +254,15 @@ def add_prices(pid: int):
             If you are editing the post, redirect to the property page.
     """
     if request.method == "POST":
-        price = request.form["price"]
-        month_disc = request.form["month-disc"]
-        year_disc = request.form["year-disc"]
-        data = {
-            "price": price,
-            "month_disc": month_disc,
-            "year_disc": year_disc,
-        }
+        data = price_data(request)
         update_firestore(
             data, session["user"]["creation_id"] if not pid else pid, "posts"
         )
         pid = session["user"]["creation_id"]
-        session["user"]["creation_id"] = ""
-        # Redirect to edit page if pid is set.
+        session["user"][
+            "creation_id"
+        ] = ""  # this clears the session creation id so the next time you add a
+        # post it will be a new post and wont overwrite the old one
         if pid:
             return redirect("/edit/" + str(pid))
         return redirect("/view/" + str(pid))

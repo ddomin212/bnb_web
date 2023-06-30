@@ -1,9 +1,15 @@
 """ This file contains the views for reviews. It allows you to add, edit and delete reviews. """
-from flask import Blueprint, render_template, redirect, request, session, abort
+from flask import Blueprint, redirect, render_template, request, session
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
-from utils.firebase import add_to_firestore, update_firestore
-from utils.firebase import firebase_query, firebase_get
-from utils.error import render_message
+
+from utils.checks import check_duplicate, check_self
+from utils.firebase import (
+    add_to_firestore,
+    firebase_get,
+    firebase_query,
+    update_firestore,
+)
+from utils.render import render_message
 
 reviews = Blueprint("reviews", __name__)
 
@@ -22,21 +28,26 @@ def add_review(pid: int):
     """
     # This is a POST request.
     if request.method == "POST":
-        with firebase_query("posts", [("id", "==", int(pid))]) as data:
-            doc = data[0]
-            # If the user is the user s uid
-            if doc["user_uid"] == session["user"]["uid"]:
-                return render_message(
-                    400, "You can't post a review on your own property"
-                )
-        with firebase_query(
-            "reviews",
-            [("reviewed", "==", int(pid)), ("reviewer", "==", session["user"]["uid"])],
-        ) as data:
-            if len(data) > 0:
-                return render_message(
-                    400, "You can't post a review on the same property twice"
-                )
+        check_self(pid)
+        check_duplicate(pid)
+        # with firebase_query("posts", [("id", "==", int(pid))]) as data:
+        #     doc = data[0]
+        #     # If the user is the user s uid
+        #     if doc["user_uid"] == session["user"]["uid"]:
+        #         return render_message(
+        #             400, "You can't post a review on your own property"
+        #         )
+        # with firebase_query(
+        #     "reviews",
+        #     [
+        #         ("reviewed", "==", int(pid)),
+        #         ("reviewer", "==", session["user"]["uid"]),
+        #     ],
+        # ) as data:
+        #     if len(data) > 0:
+        #         return render_message(
+        #             400, "You can't post a review on the same property twice"
+        #         )
         data = {
             "rating": int(request.form["rating"]),
             "text": request.form["message"],
@@ -74,7 +85,9 @@ def edit_review(rid: int):
                 doc = data[0]
                 print(doc)
             except IndexError:
-                return render_message(404, "Cannot edit a review that doesn't exist")
+                return render_message(
+                    404, "Cannot edit a review that doesn't exist"
+                )
             return render_template("review.html", doc=doc)
 
 
@@ -91,6 +104,8 @@ def delete_review(rid: int):
         "reviews", f'{rid}|{session["user"]["uid"]}', partial=True
     ) as doc_ref:
         if doc_ref.get().to_dict() is None:
-            return render_message(400, "Cannot delete a review that doesn't exist")
+            return render_message(
+                400, "Cannot delete a review that doesn't exist"
+            )
         doc_ref.delete()
         return redirect("/stays")

@@ -9,7 +9,8 @@ Functions:
 """
 
 from functools import wraps
-from flask import session, render_template
+
+from flask import render_template, session
 
 
 def login_required(f):
@@ -38,3 +39,19 @@ def login_required(f):
         return f(*args, **kwargs)
 
     return decorated_function
+
+
+def set_user_session(uid, email, typ, name=None):
+    session["user"] = {
+        "uid": uid,
+        "email": email,
+        "type": typ,
+        "name": name if name else "User",
+        # defualt values for testing
+        "verificationToken": "testing",
+        "pid": "1000000000000000",
+        "guests": "1000000000000000",
+        "from": "1970-01-01",
+        "to": "1970-01-01",
+        "creation_id": "9999",
+    }

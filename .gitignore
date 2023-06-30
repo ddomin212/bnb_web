@@ -1,6 +1,7 @@
 .env
 /bnbenv
 **/__pycache__
+**/**_cache
 config/creds.json
 Dockerfile
 .dockerignore

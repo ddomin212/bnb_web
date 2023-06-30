@@ -1,9 +1,9 @@
 """ This module contains the view functions for the profile page. """
-from flask import Blueprint, render_template, redirect, request, session
-from google.cloud.exceptions import GoogleCloudError
 from firebase_admin import auth
-from utils.firebase import get_avg_ratings, get_ratings_user
-from utils.firebase import firebase_query
+from flask import Blueprint, redirect, render_template, request, session
+
+from utils.add import user_data
+from utils.firebase import firebase_query, get_avg_ratings, get_ratings_user
 
 profile = Blueprint("profile", __name__)
 
@@ -32,24 +32,14 @@ def view_user(uid: str):
             Optionally the user can have a description and a phone number.
     """
     user = auth.get_user(uid)
-    try:
-        desc = user.custom_claims["description"]
-        phone = user.custom_claims["phone"]
-    except GoogleCloudError:
-        desc = ""
-        phone = ""
-
-    data = {
-        "displayName": user.display_name,
-        "email": user.email,
-        "description": desc,
-        "uid": user.uid,
-        "photoURL": user.photo_url,
-        "phoneNumber": phone,
-    }
+    data = user_data(user)
     with firebase_query("posts", [("user_uid", "==", uid)]) as docs:
         docs = get_avg_ratings(docs)
         reviews, avg_rating = get_ratings_user(uid)
         return render_template(
-            "profile.html", user=data, reviews=reviews, docs=docs, avg_rating=avg_rating
+            "profile.html",
+            user=data,
+            reviews=reviews,
+            docs=docs,
+            avg_rating=avg_rating,
         )

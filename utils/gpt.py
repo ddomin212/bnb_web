@@ -1,6 +1,7 @@
 """ This module is used to get travel tips from Bing AI. """
 import asyncio
 import re
+
 from sydney import SydneyClient
 
 
@@ -12,7 +13,9 @@ def parse_response(text):
 
     @return The parsed text.
     """
-    pattern = re.compile(r"^\d+\.\s+(?:(?!\[\^\d+\^\]).)+", re.MULTILINE | re.DOTALL)
+    pattern = re.compile(
+        r"^\d+\.\s+(?:(?!\[\^\d+\^\]).)+", re.MULTILINE | re.DOTALL
+    )
 
     matches = pattern.findall(text)
 

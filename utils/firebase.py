@@ -1,13 +1,16 @@
 """ This file contains all the functions that interact with the Firestore database. """
 import os
-from google.cloud.exceptions import GoogleCloudError
-from flask import current_app as app, session
-from firebase_admin import storage
-from werkzeug.utils import secure_filename
 from contextlib import contextmanager
-from typing import List, Tuple, Any
+from typing import Any, List, Tuple
+
+from firebase_admin import storage
+from flask import current_app as app
+from flask import session
+from google.cloud.exceptions import GoogleCloudError
+from werkzeug.utils import secure_filename
+
 from config import fetch_db
-from utils.error import render_message
+from utils.render import render_message
 
 
 @contextmanager
@@ -27,7 +30,11 @@ def firebase_query(collection: str, query: List[Tuple[str, str, Any]]):
         docs = fetch_db().collection(collection)
         # Find all documents that match the given query.
         for q in query:
-            docs = docs.where(q[0], q[1], int(q[2]))
+            docs = docs.where(
+                q[0],
+                q[1],
+                int(q[2]) if not isinstance(q[2], List) else q[2],
+            )
         docs = docs.stream()
         yield [doc.to_dict() for doc in docs]
     except GoogleCloudError:
@@ -249,7 +256,7 @@ def add_to_firestore(data, collection):
     doc_ref.set(data)
 
 
-def update_firestore(data, id, collection, images=False):
+def update_firestore(data, did, collection, images=False):
     """
     Update a document in Firestore.
 
@@ -262,7 +269,7 @@ def update_firestore(data, id, collection, images=False):
     doc_ref = (
         fetch_db()
         .collection(collection)
-        .document(f'{id}|{session["user"]["uid"]}')
+        .document(f'{did}|{session["user"]["uid"]}')
     )
     # Add images to the images array
     if images is True:
