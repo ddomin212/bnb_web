@@ -1,9 +1,11 @@
 """ Configures the app and registers all blueprints. """
 import os
+
 import stripe
+
 from .firebase import initialize_firebase
-from .redis import initialize_redis
 from .papertrail import initialize_papertrail
+from .redis import initialize_redis
 
 
 def initialize_app(app, testing=False):
@@ -34,4 +36,4 @@ def initialize_app(app, testing=False):
     if not testing:
         initialize_redis(app)
         initialize_firebase()
-    initialize_papertrail()
+    # initialize_papertrail()

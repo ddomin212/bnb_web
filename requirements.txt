@@ -5,3 +5,4 @@ stripe
 gunicorn
 flask-session
 sydney-py
+pytest

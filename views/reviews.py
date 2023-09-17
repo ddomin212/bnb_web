@@ -28,8 +28,14 @@ def add_review(pid: int):
     """
     # This is a POST request.
     if request.method == "POST":
-        check_self(pid)
-        check_duplicate(pid)
+        if not check_self(pid):
+            return render_message(
+                400, "You can't post a review on your own property"
+            )
+        if not check_duplicate(pid):
+            return render_message(
+                400, "You can't post a review on the same property twice"
+            )
         # with firebase_query("posts", [("id", "==", int(pid))]) as data:
         #     doc = data[0]
         #     # If the user is the user s uid
