@@ -6,3 +6,4 @@ gunicorn
 flask-session
 sydney-py
 pytest
+python-dotenv
