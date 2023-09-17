@@ -1,0 +1,74 @@
+button, input, optgroup, select, textarea {
+  font-family: sans-serif;
+  font-size: 100%;
+  line-height: 1.15;
+  margin: 0;
+}
+
+button, input {
+  overflow: visible;
+}
+
+button, select {
+  text-transform: none;
+}
+
+[type=reset], [type=submit], button, html [type=button] {
+  -webkit-appearance: button;
+  appearance: button;
+}
+
+#player {
+}
+
+.plyr__video-embed, .plyr__video-wrapper--fixed-ratio {
+  aspect-ratio: 16/9;
+}
+
+.plyr__video-embed iframe, .plyr__video-wrapper--fixed-ratio video {
+  border: 0;
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
+}
+
+.modal-body {
+  padding: 0 !important;
+  border: none !important;
+}
+
+.modal-title {
+  font-size: 16px !important;
+}
+
+.modal-header {
+  padding: 0.5rem 1rem;
+  border-bottom: 0 !important;
+  background-color: #000000;
+  border-radius: 20px;
+  color: #8696a4;
+  letter-spacing: 1.5px;
+  margin-bottom: 5px;
+}
+
+.modal-header .btn-close {
+  font-size: 10px;
+  background-color: rgba(94,111,126,0.67);
+  border-radius: 50%;
+}
+
+.modal-content {
+  background: none !important;
+  border: none !important;
+}
+
+.sys-box-course-modal {
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(15.6px);
+  -webkit-backdrop-filter: blur(15.6px);
+  background-color: rgba(0,0,0,0.08);
+  border-radius: 20px;
+}
+

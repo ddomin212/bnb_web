@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% block title %}
+  Location
+{% endblock %}
+{% block content %}
+  <section class="py-4 py-xl-5"></section>
+  <div class="container py-4 py-xl-5">
+    <div class="row gy-4 gy-md-0">
+      <div class="col-md-6 text-center text-md-start d-flex d-sm-flex d-md-flex justify-content-center align-items-center justify-content-md-start align-items-md-center justify-content-xl-center">
+        <form method="post">
+          <fieldset name="space" required>
+            <div style="max-width: 500px; width: 300px">
+              <h2 class="text-uppercase fw-bold"></h2>
+              <p class="my-3">How much of the space are you renting?</p>
+              <div class="input-group mb-3" style="width: 100%">
+                <div class="input-group-text" style="
+                  height: 40px;
+                  border-top-left-radius: 10px;
+                  border-bottom-left-radius: 10px;
+                ">
+                  <input name="space" type="radio" class="form-check-input mt-0" aria-label="Checkbox for following text input" value="whole" />
+                </div>
+                <div class="form-floating mt-0" style="height: 50px">
+                  <input type="text" id="theID" disabled="true" class="form-control" placeholder="Placeholder" style="
+                    width: 265px;
+                    height: 40px;
+                    border-top-right-radius: 10px;
+                    border-bottom-right-radius: 10px;
+                  " /><label class="form-label" for="theID" style="padding: 0.5rem 0.75rem; color: rgb(0, 0, 0)">An entire place</label>
+                </div>
+              </div>
+              <div class="input-group mb-3" style="width: 100%">
+                <div class="input-group-text" style="
+                  height: 40px;
+                  border-top-left-radius: 10px;
+                  border-bottom-left-radius: 10px;
+                ">
+                  <input name="space" type="radio" class="form-check-input mt-0" aria-label="Checkbox for following text input" value="room" />
+                </div>
+                <div class="form-floating mt-0" style="height: 50px">
+                  <input type="text" id="theID-2" disabled="true" class="form-control" placeholder="Placeholder" style="
+                    width: 265px;
+                    height: 40px;
+                    border-top-right-radius: 10px;
+                    border-bottom-right-radius: 10px;
+                  " /><label class="form-label" for="theID" style="padding: 0.5rem 0.75rem; color: rgb(0, 0, 0)">A private room</label>
+                </div>
+              </div>
+              <div class="input-group mb-3" style="width: 100%">
+                <div class="input-group-text" style="
+                  height: 40px;
+                  border-top-left-radius: 10px;
+                  border-bottom-left-radius: 10px;
+                ">
+                  <input name="space" type="radio" class="form-check-input mt-0" aria-label="Checkbox for following text input" value="shared" />
+                </div>
+                <div class="form-floating mt-0" style="height: 50px">
+                  <input type="text" disabled="true" id="theID-1" class="form-control" placeholder="Placeholder" style="
+                    width: 265px;
+                    height: 40px;
+                    border-top-right-radius: 10px;
+                    border-bottom-right-radius: 10px;
+                  " /><label class="form-label" for="theID" style="padding: 0.5rem 0.75rem; color: rgb(0, 0, 0)">A shared room</label>
+                </div>
+              </div>
+              <button class="btn btn-dark btn-sm me-2" role="submit" style="margin-top: 16px">Continue</button>
+            </div>
+          </fieldset>
+        </form>
+      </div>
+      <div class="col-md-6">
+        <div class="p-xl-5 m-xl-5">
+          <img class="rounded img-fluid w-100 fit-cover" style="
+            min-height: 300px;
+            border-width: 3px;
+            border-style: groove;
+            height: 400px;
+          " src="{{ url_for('static', filename = 'img/Leonardo_Signature_a_very_nice_looking_room_with_a_big_window_umineko_ultra_orn_0.jpg') }}" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <header class="bg-dark"></header>
+  <footer class="text-center bg-dark">
+    <div class="container text-white py-4 py-lg-5" style="background: #1f1e21">
+      <p style="font-size: 20px">step 3/5</p>
+    </div>
+  </footer>
+  <script>
+    // get all checkbox inputs within the fieldset
+    const checkboxes = document.querySelectorAll('fieldset input[type="radio"]')
+    
+    // iterate over the checkboxes and check the one with value "shared"
+    checkboxes.forEach((checkbox) => {
+      if (checkbox.value === '{{doc.space if doc else "shared"}}') {
+        checkbox.checked = true
+      }
+    })
+  </script>
+{% endblock %}

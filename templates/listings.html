@@ -1,0 +1,164 @@
+{% extends 'base.html' %} {% block title %}Listings{% endblock title %} {% block
+content %}
+<div class="container py-4 py-xl-5">
+  <div class="row gy-4 row-cols-1 row-cols-md-2 row-cols-xl-3">
+    {% for data in docs %}
+    <div class="col">
+        <div class="card">
+          {% if session["user"] %}
+          {% if fav_doc["favs"] %}
+          {% if data["id"]|string not in fav_doc["favs"] %}
+          <i
+          onclick="updateFavorites({{data["id"]|int}})"
+          style="
+          position: absolute;
+          font-size: 30px;
+          margin-left: 12px;
+          color: rgb(210, 26, 26);
+        "
+            class="icon ion-ios-heart-outline"
+            id = "favorite-{{data["id"]|int}}"
+            
+          ></i
+          >
+          {% else %}
+          <i
+          onclick="updateFavorites({{data["id"]|int}})"
+          style="
+          position: absolute;
+          font-size: 30px;
+          margin-left: 12px;
+          color: rgb(210, 26, 26);
+        "
+            class="icon ion-ios-heart"
+            id = "favorite-{{data["id"]|int}}"
+            
+          ></i
+          >
+          {% endif %}
+          {% else %}
+          <i
+          onclick="updateFavorites({{data["id"]|int}}, 'add')"
+          style="
+          position: absolute;
+          font-size: 30px;
+          margin-left: 12px;
+          color: rgb(210, 26, 26);
+        "
+            class="icon ion-ios-heart-outline"
+            id = "favorite-{{data["id"]|int}}"
+            
+          ></i
+          >
+          {% endif %}
+          {% endif %}
+          <img
+            class="card-img w-100 d-block fit-cover"
+            style="height: 300px; border-radius: 16px"
+            src="{{data["images"][0] if data["images"] else 'https://via.placeholder.com/300x300.png?text=No+Image'}}"
+          />
+          <a href="/view/{{data["id"]|int}}" style="color: white;">
+          <div class="card-body p-4">
+            <div class="row">
+              <div class="col-7">
+                <p class="text-primary mb-0">
+                  <em>{{data["city"]}}</em>
+                </p>
+                <h4 style="font-size: 22px">{{data["country"]}}</h4>
+                <div class="d-flex">
+                  <div>
+                    <p class="text-muted mb-0">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="1em"
+                        height="1em"
+                        fill="currentColor"
+                        viewBox="0 0 16 16"
+                        class="bi bi-star-half"
+                        style="margin-right: 14px; margin-bottom: 3px"
+                      >
+                        <path
+                          d="M5.354 5.119 7.538.792A.516.516 0 0 1 8 .5c.183 0 .366.097.465.292l2.184 4.327 4.898.696A.537.537 0 0 1 16 6.32a.548.548 0 0 1-.17.445l-3.523 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256a.52.52 0 0 1-.146.05c-.342.06-.668-.254-.6-.642l.83-4.73L.173 6.765a.55.55 0 0 1-.172-.403.58.58 0 0 1 .085-.302.513.513 0 0 1 .37-.245l4.898-.696zM8 12.027a.5.5 0 0 1 .232.056l3.686 1.894-.694-3.957a.565.565 0 0 1 .162-.505l2.907-2.77-4.052-.576a.525.525 0 0 1-.393-.288L8.001 2.223 8 2.226v9.8z"
+                        ></path></svg
+                      >{{data.avg_rating if data.avg_rating else 'None'}}
+                    </p>
+                  </div>
+                </div>
+                {% if type=="rentals" %}
+                <ul
+                  class="list-inline"
+                  style="margin-bottom: 0px; margin-top: 20px"
+                >
+                  <li class="list-inline-item" style="margin-right: 0px"></li>
+                  <li class="list-inline-item">
+                    <a href="/edit/{{data["id"]|int}}">Edit</a>
+                  </li>
+                  <li class="list-inline-item">
+                    <a
+                      href="/delete/{{data["id"]|int}}"
+                      style="margin-left: 12px; margin-bottom: 12px"
+                      >Delete</a
+                    >
+                  </li>
+                </ul>
+                {% elif type=="reviews" %}
+                <br>
+                <a id="review-link" href="/review/add/{{data["id"]|int}}">Review your stay</a>
+                <ul
+                  class="list-inline"
+                  style="margin-bottom: 0px; margin-top: 20px"
+                >
+                {% if data["id"]|int in review_ids %}
+                  <li class="list-inline-item" style="margin-bottom: 12px">
+                    <a href="/review/edit/{{data["id"]|int}}">Edit</a>
+                  </li>
+                  <li class="list-inline-item">
+                    <a
+                      href="/review/delete/{{data["id"]|int}}"
+                      style="margin-left: 8px; margin-bottom: 12px"
+                      >Delete</a
+                    >
+                  </li>
+                </ul>
+                {% endif %}
+                {% endif %}
+              </div>
+              <div
+                class="col d-xl-flex justify-content-xl-center align-items-xl-center"
+                style="margin-top: 16px"
+              >
+                <p class="text-end"><strong>{{data["price"]}} $AUD</strong><br>night</p>
+              </div>
+            </div>
+          </div>
+          </a>
+        </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+<script>
+  function updateFavorites(id) {
+    var heart = document.getElementById(`favorite-${id}`)
+    let type = "";
+    if (heart.className == "icon ion-ios-heart") {
+      type = "delete"
+    }
+    if (heart.className == "icon ion-ios-heart-outline") {
+      type = "add"
+    }
+    const res = fetch(`/fav/${type}/${id}`, {
+      method: "GET",
+    }).then((result)=>{
+      if (result.status == 200) {
+        if (type=="delete") {
+          heart.className = "icon ion-ios-heart-outline";
+        } 
+        if (type=="add") {
+          heart.className = "icon ion-ios-heart";
+        } 
+      }
+    })
+  }
+</script>
+{% endblock content %}

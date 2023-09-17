@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}
+  Images
+{% endblock %}
+{% block head %}
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'css/Drag-and-Drop-Multiple-File-Form-Input-upload-Advanced.css') }}" />
+{% endblock %}
+{% block content %}
+  <section class="py-4 py-xl-5">
+    {% if doc %}
+      <div class="text-center container">
+        <div class="row">
+          {% for img in doc.images %}
+            <div class="col" style="object-fit: contain;width: 300px;height: 200px;">
+              <a href="/delete-img/{{ doc.id|int }}/{{ img.rsplit('/', 1)[1] }}" style="position: absolute;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="1em" height="1em" fill="currentColor" style="font-size: 36px;color: rgba(255,15,0,0.85);">
+                  <path d="M0 256C0 114.6 114.6 0 256 0C397.4 0 512 114.6 512 256C512 397.4 397.4 512 256 512C114.6 512 0 397.4 0 256zM168 232C154.7 232 144 242.7 144 256C144 269.3 154.7 280 168 280H344C357.3 280 368 269.3 368 256C368 242.7 357.3 232 344 232H168z"></path>
+                </svg>
+              </a><img src="{{ img }}" style="width: 200px;" />
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  </section>
+  <div class="d-xl-flex justify-content-xl-center m-5" style="text-align: center;">
+    <div id="backdrop" class="backdrop backdrop-transition backdrop-dark">
+      <div class="text-center w-100" style="position: absolute;top: 50%;">
+        <div class="bg-light border rounded border-success shadow-lg m-auto" style="width: 150px;height: 150px;">
+          <i class="fa fa-upload d-block p-4" style="font-size: 50px;"></i><span>Drop file to attach</span>
+        </div>
+      </div>
+    </div>
+    <div class="bg-light border rounded border-light pt-1 jumbotron py-5 px-4" style="background: rgba(0,0,0,0.8) !important;max-width: 900px;width: 1140px;">
+      <div class="alert alert-success invisible mt-5" role="alert">
+        <span id="notify"></span>
+      </div>
+      <h1>Add your photos</h1>
+      <p>
+        <label class="form-label" for="form-files"><a class="btn btn-link btn-sm" role="button" style="padding-right: 0px;padding-left: 0px;font-size: 16px;padding-top: 1px;">Choose files</a></label>&nbsp;or drag the files to anywhere on this page.<br />
+      </p>
+      <p id="filecount">
+        <br />
+      </p>
+      <div id="list"></div>
+      <form method="post" enctype="multipart/form-data">
+        <input class="form-control invisible" type="file" id="form-files" name="image" multiple="" />
+        <div class="d-xl-flex justify-content-evenly align-items-xl-center">
+          <button class="btn btn-dark d-block" type="submit" style="height: 50px;">Submit</button><button class="btn btn-outline-warning d-block" type="reset" style="height: 50px;" onclick="clearFiles()">Reset</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <div class="text-center bg-light border rounded border-dark shadow-lg p-3" style="background: rgb(31,30,33) !important;" hidden>
+    <img id="image_preview" width="100" />
+    <div>
+      <button class="btn btn-warning btn-sm m-3" onclick="previewClose()">Close</button>
+    </div>
+  </div>
+
+  <header class="bg-dark"></header>
+  <div class="container text-white py-4 py-lg-5" style="background: #1f1e21;">
+    <p style="font-size: 20px;text-align: center;">step 6/5</p>
+  </div>
+{% endblock %}
+{% block scripts %}
+  <script src="{{ url_for('static', filename = 'js/Drag-and-Drop-Multiple-File-Form-Input-upload-Advanced-drop.js') }}"></script>
+{% endblock %}

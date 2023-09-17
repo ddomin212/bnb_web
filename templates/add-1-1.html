@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}
+  Location
+{% endblock %}
+{% block content %}
+  <section class="py-4 py-xl-5"></section>
+  <div class="container py-4 py-xl-5">
+    <div class="row gy-4 gy-md-0">
+      <div class="col-md-6 text-center text-md-start d-flex d-sm-flex d-md-flex justify-content-center align-items-center justify-content-md-start align-items-md-center justify-content-xl-center">
+        <form method="post">
+          <div style="max-width: 600px; width: 350px">
+            <h2 class="text-uppercase fw-bold"></h2>
+            <p class="my-3">What type of place are you renting</p>
+            <select class="form-control" name="type" id="type">
+              <option value="apartment" selected="" title="An apartment in a building">Apartment</option>
+              <option value="expirience" title="A special living condition, i.e. Yurta">Expirience</option>
+              <option value="house" title="A whole house">House</option>
+              <option value="bnb" title="Your usual bed and breakfast expirience">Bed 'n Breakfast</option>
+            </select>
+            <div class="mt-3">
+              <label class="form-label" id="lbl-email-3" for="txt-email">Available renting period (from-to)</label>
+              <div class="row">
+                <div class="col-6">
+                  <input class="form-control" type="date" name="from" value="{{doc.from.strftime('%Y-%m-%d') if doc else ""}}" />
+                </div>
+                <div class="col-6">
+                  <input class="form-control" type="date" name="to" value="{{doc.to.strftime('%Y-%m-%d') if doc else ""}}" />
+                </div>
+              </div>
+            </div>
+
+            <button class="btn btn-dark btn-sm me-2" role="submit" style="margin-top: 16px">Continue</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="col-md-6">
+        <div class="p-xl-5 m-xl-5">
+          <img class="rounded img-fluid w-100 fit-cover" style="
+            min-height: 300px;
+            border-width: 3px;
+            border-style: groove;
+            height: 400px;
+          " src="{{ url_for('static', filename = 'img/Leonardo_Diffusion_tongkonan_house_painting_in_the_style_of_Ni_3.jpg') }}" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer class="text-center bg-dark">
+    <div class="container text-white py-4 py-lg-5" style="background: #1f1e21">
+      <p style="font-size: 20px">step 2/5</p>
+    </div>
+  </footer>
+  <script>
+    const select = document.getElementById("type"); // Replace 'my-select' with the ID of your select element
+    const valueToSelect = "{{doc.type if doc else 'apartment'}}"; // Replace with the number value representing the option you want to select
+
+    for (let i = 0; i < select.options.length; i++) {
+      const option = select.options[i];
+      if (option.value === valueToSelect) {
+        option.selected = true;
+        break;
+      }
+    }
+  </script>
+{% endblock %}
