@@ -5,7 +5,7 @@ import re
 from sydney import SydneyClient
 
 
-def parse_response(text):
+def parse_response(text: str):
     """
     Parse response text to extract data. This is a helper function for L { get_response }.
 
@@ -22,7 +22,7 @@ def parse_response(text):
     return matches[0].split("\n")
 
 
-async def main(text) -> None:
+async def main(text: str) -> None:
     """
     Asks Bing AI (SydneyClient) for information about the top 10
     places to visit in 50 km range of a location.
@@ -45,7 +45,7 @@ async def main(text) -> None:
         return matching
 
 
-def get_travel_tips(text):
+def get_travel_tips(text: str):
     """
     This is just an async wrapper for L { main }.
 

@@ -22,7 +22,7 @@ jobs:
           pip install -r requirements.txt
       - name: Get firebase credentials
         run: |
-            echo '${{ secrets.FIREBASE_CREDS }}' > ./config/creds.json
+            echo '${{ secrets.FIREBASE_CREDS }}' > ./components/creds.json
       - name: Test with pytest
         run: pytest
         env:

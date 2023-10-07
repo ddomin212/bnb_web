@@ -3,9 +3,10 @@ import os
 
 from flask_session import Session
 from redis import Redis
+from flask import Flask
 
 class RedisComponent:
-    def __init__(self, app):
+    def __init__(self, app: Flask):
         """
         Initialize redis session. This is called by : func : ` ~flask. Flask. init_redis `
 

@@ -3,15 +3,14 @@ import unittest
 from datetime import datetime
 from unittest.mock import patch, MagicMock
 import pytest
-from flask import session
 from utils.time import convert_date
-
+from flask.testing import FlaskClient
 
 class TestProfile(unittest.TestCase):
     """Test class for the profile view. Default alphabetical ordering of tests at runtime will do in this case."""
 
     @pytest.fixture(autouse=True)
-    def auth_client(self, auth_client):
+    def auth_client(self, auth_client: FlaskClient):
         """Fixture for an authenticated client available in all methods."""
         self.auth_client = auth_client
 

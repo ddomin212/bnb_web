@@ -1,9 +1,10 @@
 """ This module contains tests for the Stripe payment routes. """
 from unittest.mock import patch, MagicMock
 from flask import session
+from flask.testing import FlaskClient
+from typing import Any
 
-
-def test_create_checkout_session(auth_client, mocked_posts):
+def test_create_checkout_session(auth_client: FlaskClient, mocked_posts:list[dict[str, Any]]):
     """
     Create a test for the create checkout session route.
     This test will mock the database and Stripe API calls.
@@ -39,7 +40,7 @@ def test_create_checkout_session(auth_client, mocked_posts):
         assert response.headers["Location"] == "https://example.com/checkout"
 
 
-def test_success_payment(auth_client):
+def test_success_payment(auth_client: FlaskClient):
     """
     Test the success route for payment. This is a test to make sure we can get the
     verification token and redirect to the payment page

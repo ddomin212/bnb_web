@@ -3,9 +3,10 @@ from google.cloud.exceptions import GoogleCloudError
 
 from utils.render import render_message
 from utils.time import convert_date
+from flask import Request
+from firebase_admin import auth
 
-
-def address_data(request):
+def address_data(request: Request):
     """
     Add an address to the database
 
@@ -42,7 +43,7 @@ def address_data(request):
     return data
 
 
-def tags_data(request):
+def tags_data(request: Request):
     basics = request.form.getlist("basics")
     views = request.form.getlist("views")
     safety = request.form.getlist("safety")
@@ -58,7 +59,7 @@ def tags_data(request):
     return data
 
 
-def type_date_data(request):
+def type_date_data(request: Request):
     typ = request.form["type"].strip()
     vfrom = convert_date(request.form["from"])
     to = convert_date(request.form["to"])
@@ -70,7 +71,7 @@ def type_date_data(request):
     return data
 
 
-def basic_data(request):
+def basic_data(request: Request):
     bedrooms = request.form["bedrooms"]
     guests = request.form["guests"]
     baths = request.form["baths"]
@@ -84,7 +85,7 @@ def basic_data(request):
     return data
 
 
-def price_data(request):
+def price_data(request: Request):
     price = request.form["price"]
     month_disc = request.form["month-disc"]
     year_disc = request.form["year-disc"]
@@ -96,11 +97,11 @@ def price_data(request):
     return data
 
 
-def user_data(user):
-    try:
+def user_data(user: auth.UserRecord):
+    if user.custom_claims:
         desc = user.custom_claims["description"]
         phone = user.custom_claims["phone"]
-    except GoogleCloudError:
+    else:
         desc = ""
         phone = ""
 

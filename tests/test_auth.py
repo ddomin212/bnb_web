@@ -2,18 +2,18 @@
 import unittest
 import pytest
 from flask import session
-
+from flask.testing import FlaskClient
 
 class TestAuth(unittest.TestCase):
     """Test class for the authentication functionality. Default alphabetical ordering of tests at runtime will do in this case."""
 
     @pytest.fixture(autouse=True)
-    def client(self, client):
+    def client(self, client: FlaskClient):
         """Fixture for an unauthenticated client available in all methods."""
         self.client = client
 
     @pytest.fixture(autouse=True)
-    def auth_client(self, auth_client):
+    def auth_client(self, auth_client: FlaskClient):
         """Fixture for an authenticated client available in all methods."""
         self.auth_client = auth_client
 

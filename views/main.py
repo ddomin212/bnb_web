@@ -5,6 +5,7 @@ from utils.countries import countries
 from components.firebase.database import firebase_get, firebase_query, get_avg_ratings
 from utils.render import render_message
 from utils.search import get_search_params
+from utils.render import error_handler
 
 main = Blueprint("main", __name__)
 
@@ -23,6 +24,7 @@ def inject_variables():
 
 
 @main.route("/")
+@error_handler
 def index():
     """
     Shows listings of current user. This is the page that is displayed when the
@@ -46,6 +48,7 @@ def index():
 
 @main.route("/favorites")
 @login_required
+@error_handler
 def my_favs():
     """
     List favorites of the current user. This is a view to show the list of
@@ -70,6 +73,7 @@ def my_favs():
 
 @main.route("/my-listings")
 @login_required
+@error_handler
 def my_listings():
     """
     Listings of the logged in user. This is the page that lists rentals of the user.
@@ -88,6 +92,7 @@ def my_listings():
 
 @main.route("/listings/<uid>")
 @login_required
+@error_handler
 def user_listings(uid):
     """
     Listings of a user. This is a view to display the listings of a user.
@@ -107,6 +112,7 @@ def user_listings(uid):
 
 @main.route("/stays")
 @login_required
+@error_handler
 def my_stays():
     """
     Listings of a user's stays. This is a view that allows to view the
@@ -137,6 +143,7 @@ def my_stays():
 
 
 @main.route("/search", methods=["POST"])
+@error_handler
 def search():
     """
     Search for posts that match the given criteria. You can search by date range and price range, country or the maximum number of guests.

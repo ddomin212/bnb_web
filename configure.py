@@ -5,9 +5,10 @@ import stripe
 
 from components.firebase.setup import FirebaseComponent
 from components.redis import RedisComponent
+from flask import Flask
 
 
-def initialize_app(app, testing=False):
+def initialize_app(app: Flask, testing=False):
     """
     Initialize app enviroment and extensions, such as redis and firebase.
     This function should be called before running the app.

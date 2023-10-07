@@ -27,7 +27,7 @@ def inject_variables():
 
 @payments.route("/payment/<pid>", methods=["POST"])
 @login_required
-def create_checkout_session(pid):
+def create_checkout_session(pid: int):
     """
     Create a payment session This is used to create a booking for a property.
     This route does not allow the user to book their own property.

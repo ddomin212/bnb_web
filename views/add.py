@@ -20,14 +20,12 @@ from utils.render import render_message
 add = Blueprint("add", __name__)
 
 
-def get_add_page(pid, template):
+def get_add_page(pid: int, template: str):
     """
     Get the specific add page for a post.
 
     @param pid - pid of the post to get the page for
-    @param template - template to render
-
-    @return the template to render
+    @param template - HTML to render
     """
     if pid:
         with firebase_get("posts", f"{pid}|{session['user']['uid']}") as doc:

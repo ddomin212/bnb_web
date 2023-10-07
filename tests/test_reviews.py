@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import patch, MagicMock, Mock
 import pytest
 from flask import session
-
+from flask.testing import FlaskClient
 
 class TestReviews(unittest.TestCase):
     """Test class for the reviews blueprint. Numbering the methods is important
@@ -11,7 +11,7 @@ class TestReviews(unittest.TestCase):
     """
 
     @pytest.fixture(autouse=True)
-    def auth_client(self, auth_client):
+    def auth_client(self, auth_client: FlaskClient):
         """Fixture for an authenticated client available in all methods."""
         self.auth_client = auth_client
 

@@ -34,7 +34,6 @@ def firebase_query(collection: str, query: List[Tuple[str, str, Any]]):
     except GoogleCloudError:
         return render_message(500, "Cannot connect to database.")
 
-
 @contextmanager
 def firebase_get(collection: str, name: str, partial: bool = False):
     """
@@ -83,7 +82,7 @@ def get_avg_rating(id):
     return avg_rating
 
 
-def get_avg_ratings(docs):
+def get_avg_ratings(docs: list[dict[str, Any]]):
     """
     Get the average ratings for a list of documents. This is a convenience function for get_avg_rating.
 
@@ -97,7 +96,7 @@ def get_avg_ratings(docs):
     return docs
 
 
-def get_ratings_property(id):
+def get_ratings_property(id: int):
     """
     Get ratings for a reviewed property. This is a list of dictionaries
     that contain information about the reviews.
@@ -117,7 +116,7 @@ def get_ratings_property(id):
     return ratings
 
 
-def get_ratings_user(uid):
+def get_ratings_user(uid: str):
     """
     Get ratings for a user among all his properties.
     This is a list of dictionaries with one dictionary per review.
@@ -145,15 +144,16 @@ def get_ratings_user(uid):
         ratings = [review["rating"] for review in reviews]
         avg_rating = sum(ratings) / len(ratings) if len(ratings) > 0 else 0
     except GoogleCloudError:
-        return []
+        return [], 0
     return reviews, avg_rating
 
 
-def add_to_firestore(data, collection):
+def add_to_firestore(data: dict[str, Any], collection: str):
     """
     Add a document to firestore.
 
-    @param data - The data to add to firestore. It should be a dictionary.
+    @param data - The data to add as a document
+    @param collection - The collection to add the document to
     """
     # Get a reference to the document collection
     ref = connect_to_firestore().collection(collection)
@@ -165,12 +165,12 @@ def add_to_firestore(data, collection):
     doc_ref.set(data)
 
 
-def update_firestore(data, did, collection, images=False):
+def update_firestore(data: dict[str, Any], did: int, collection: str, images: bool = False):
     """
     Update a document in Firestore.
 
     @param data - The data to update.
-    @param id - The id of the document that needs to be updated.
+    @param did - The id of the document that needs to be updated.
     @param collection - The collection to update the document in.
     @param images - If True add the images to the document. If False add the images
     """
@@ -190,11 +190,11 @@ def update_firestore(data, did, collection, images=False):
     doc_ref.update(data)
 
 
-def add_favorite(data):
+def add_favorite(data: dict[str, Any]):
     """
     Add a favourite to the user's favorites.
 
-    @param data - The property to add to the user's favorites
+    @param data - The updated data with a new property
 
     @return 404 if the user does not exist or 200 if the operation was successful
     """
@@ -207,7 +207,7 @@ def add_favorite(data):
         return Exception, 404
 
 
-def update_favorites(data):
+def update_favorites(data: dict[str, Any]):
     """
     Update favorites for the current user. This will update the
     user's favorite list with the data provided

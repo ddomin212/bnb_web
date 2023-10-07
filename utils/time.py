@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta
 
 
-def format_dates(fromd, tod):
+def format_dates(fromd: datetime, tod: datetime):
     """
     Formats dates for use in the app.
 
@@ -22,7 +22,7 @@ def format_dates(fromd, tod):
     return vfrom, to
 
 
-def format_firebase_date(dt_with_ns):
+def format_firebase_date(dt_with_ns: datetime):
     """
     Formats a datetime. date with nanoseconds since January 1 1970 for use with Firebase.
 
@@ -33,7 +33,7 @@ def format_firebase_date(dt_with_ns):
     return datetime.date(datetime(dt_with_ns.year, dt_with_ns.month, dt_with_ns.day))
 
 
-def convert_date(date):
+def convert_date(date: datetime):
     """
     Convert a date string to a datetime object. This is useful for date parsing in the case of dates that don't have a timezone ( e. g.
 

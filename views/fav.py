@@ -11,7 +11,7 @@ fav = Blueprint("fav", __name__)
 
 @fav.route("/fav/add/<pid>", methods=["GET"])
 @login_required
-def add_fav(pid):
+def add_fav(pid: int):
     """
     Add a pid to the user's favorites. This will add the pid to the user's favorites
     if it doesn't exist and will return a 400 if it does
@@ -39,7 +39,7 @@ def add_fav(pid):
 
 @fav.route("/fav/delete/<pid>", methods=["GET"])
 @login_required
-def delete_fav(pid):
+def delete_fav(pid: int):
     """
     Delete a favorite from the user's favorites.
 

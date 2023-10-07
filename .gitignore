@@ -2,7 +2,7 @@
 /env
 **/__pycache__
 **/**_cache
-config/creds.json
+**/creds.json
 Dockerfile
 .dockerignore
 ```

@@ -4,18 +4,18 @@ from unittest.mock import patch, MagicMock
 from datetime import datetime
 import pytest
 from utils.time import convert_date
-
+from flask.testing import FlaskClient
 
 class TestPost(unittest.TestCase):
     """Test class of the various routes in the property blueprint. Numbers denote the ordering of the tests at runtime."""
 
     @pytest.fixture(autouse=True)
-    def auth_client(self, auth_client):
+    def auth_client(self, auth_client: FlaskClient):
         """Fixture for an authenticated client available in all methods."""
         self.auth_client = auth_client
 
     @pytest.fixture(autouse=True)
-    def client(self, client):
+    def client(self, client: FlaskClient):
         """Fixture for an unauthenticated client available in all methods."""
         self.client = client
 

@@ -1,6 +1,6 @@
 """ This file contains all the functions that interact with the Firestore database. """
 import os
-
+from flask import Request
 from .setup import connect_to_firestore
 from firebase_admin import storage
 from flask import current_app as app
@@ -8,7 +8,7 @@ from flask import session
 from werkzeug.utils import secure_filename
 
 
-def upload_to_bucket(filename):
+def upload_to_bucket(filename: str):
     """
     Uploads a file to Firebase Storage. This is a convenience function for upload_to_bucket and upload_to_bucket_file
 
@@ -22,7 +22,7 @@ def upload_to_bucket(filename):
     return blob.public_url
 
 
-def upload_images(request):
+def upload_images(request: Request):
     """
     Uploads images to Firebase Storage. This is a wrapper around upload_to_bucket to
     allow upload of mutiple images to Firebase Storage
@@ -54,7 +54,7 @@ def upload_images(request):
     return urls
 
 
-def update_images(request, id):
+def update_images(request: Request, id: int):
     """
     Updates images for a post. This is used to upload images to Firebase Storage
     and remove them from the database document.
@@ -92,7 +92,7 @@ def update_images(request, id):
     return new_urls
 
 
-def allowed_file(filename):
+def allowed_file(filename: str):
     """
     Checks if filename is allowed to be uploaded. This is a case insensitive check
     to make sure we don't accidentally upload files with different extensions

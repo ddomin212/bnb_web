@@ -1,8 +1,8 @@
 from utils.render import render_message
 from utils.time import format_dates
+from flask import Request
 
-
-def get_search_params(request):
+def get_search_params(request: Request):
     """
     Get the search parameters from the request object.
 

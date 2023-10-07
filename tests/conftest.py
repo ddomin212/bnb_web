@@ -2,7 +2,7 @@
 from unittest.mock import MagicMock
 import pytest
 from utils.time import convert_date
-
+from flask import Flask
 
 @pytest.fixture()
 def app():
@@ -16,7 +16,7 @@ def app():
 
 
 @pytest.fixture()
-def client(app):
+def client(app: Flask):
     """
     Create a test client for the given app. This is a convenience function to use in tests that need to test the client.
 
@@ -28,7 +28,7 @@ def client(app):
 
 
 @pytest.fixture()
-def auth_client(app):
+def auth_client(app: Flask):
     """
     Fixture for authentificated client. This fixture is used to test authentificatied routes.
 

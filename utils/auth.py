@@ -13,7 +13,7 @@ from functools import wraps
 from flask import render_template, session
 
 
-def login_required(f):
+def login_required(f: callable):
     """
     A decorator function that checks if the user is logged in before allowing access
     to a Flask route. If the user is not logged in, returns a 401 Unauthorized error.
@@ -41,7 +41,7 @@ def login_required(f):
     return decorated_function
 
 
-def set_user_session(uid, email, typ, name=None):
+def set_user_session(uid: str, email: str, typ: str, name: str | None = None):
     session["user"] = {
         "uid": uid,
         "email": email,
