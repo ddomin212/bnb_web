@@ -48,7 +48,7 @@ def create_checkout_session(pid):
             },
         ],
         success_url=f"""{os.environ["FLASK_URL"]}/payment-
-                        success?session_id={"{CHECKOUT_SESSION_ID}"}""",
+                    success?session_id={"{CHECKOUT_SESSION_ID}"}""",
         cancel_url=f'{os.environ["FLASK_URL"]}/cancel',
     )
     session["user"]["verificationToken"] = payment_session.id
@@ -70,7 +70,7 @@ def success_payment():
     @return A view with success status and error message if there was an
             error or a redirect to the payment page
     """
-    from utils.firebase import add_to_firestore
+    from components.firebase.database import add_to_firestore
 
     payment_session_id = request.args.get("session_id")
     # This function is used to add a booking to firestore database.

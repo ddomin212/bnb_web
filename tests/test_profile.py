@@ -120,7 +120,7 @@ class TestProfile(unittest.TestCase):
             # Assert that the mock function was called with the expected data
             mock_set_claims.assert_called_once_with(self.uid, expected_data)
 
-    @patch("utils.firebase.get_avg_rating", return_value=4.5)
+    @patch("components.firebase.database.get_avg_rating", return_value=4.5)
     def test_view_user(self, mock_get_avg_rating):
         """
         Test the view_user method. This is a test for the rating_view. py script.

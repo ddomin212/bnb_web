@@ -2,7 +2,7 @@
 from flask import Blueprint, redirect, render_template, request, session
 from utils.auth import login_required
 from utils.countries import countries
-from utils.firebase import firebase_get, firebase_query, get_avg_ratings
+from components.firebase.database import firebase_get, firebase_query, get_avg_ratings
 from utils.render import render_message
 from utils.search import get_search_params
 

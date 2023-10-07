@@ -14,6 +14,6 @@ def get_search_params(request):
     from_price = request.form["from-price"]
     to_price = request.form["to-price"]
     country = request.form["country"]
-    guests = int(request.form["guests"]) if guests != "" else 0
+    guests = int(request.form["guests"]) if request.form["guests"] != "" else 0
 
     return vfrom, to, from_price, to_price, country, guests

@@ -9,14 +9,13 @@ from utils.add import (
     type_date_data,
 )
 from utils.auth import login_required
-from utils.firebase import (
+from components.firebase.database import (
     add_to_firestore,
     firebase_get,
     update_firestore,
-    upload_images,
 )
+from components.firebase.storage import upload_images
 from utils.render import render_message
-from utils.time import convert_date
 
 add = Blueprint("add", __name__)
 

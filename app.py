@@ -1,7 +1,7 @@
 """ The main entry point for the Flask application. """
 import os
 
-from config import initialize_app
+from configure import initialize_app
 from dotenv import load_dotenv
 from flask import Flask
 from views import add, authapi, fav, main, payments, posts, profile, reviews

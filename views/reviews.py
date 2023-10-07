@@ -3,7 +3,7 @@ from flask import Blueprint, redirect, render_template, request, session
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 
 from utils.checks import check_duplicate, check_self
-from utils.firebase import (
+from components.firebase.database import (
     add_to_firestore,
     firebase_get,
     firebase_query,
@@ -36,24 +36,6 @@ def add_review(pid: int):
             return render_message(
                 400, "You can't post a review on the same property twice"
             )
-        # with firebase_query("posts", [("id", "==", int(pid))]) as data:
-        #     doc = data[0]
-        #     # If the user is the user s uid
-        #     if doc["user_uid"] == session["user"]["uid"]:
-        #         return render_message(
-        #             400, "You can't post a review on your own property"
-        #         )
-        # with firebase_query(
-        #     "reviews",
-        #     [
-        #         ("reviewed", "==", int(pid)),
-        #         ("reviewer", "==", session["user"]["uid"]),
-        #     ],
-        # ) as data:
-        #     if len(data) > 0:
-        #         return render_message(
-        #             400, "You can't post a review on the same property twice"
-        #         )
         data = {
             "rating": int(request.form["rating"]),
             "text": request.form["message"],

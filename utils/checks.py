@@ -1,6 +1,6 @@
 from flask import session
 
-from utils.firebase import firebase_query
+from components.firebase.database import firebase_query
 from utils.render import render_message
 
 

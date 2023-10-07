@@ -126,7 +126,7 @@ class TestMain(unittest.TestCase):
     def tearDownClass(cls):
         cls.patcher.stop()
 
-    @patch("utils.firebase.get_avg_rating", return_value=4.5)
+    @patch("components.firebase.database.get_avg_rating", return_value=4.5)
     def test_01_index(self, mock_get_avg_rating):
         """
         Make a request to the index route and check that the response is 200.
@@ -140,7 +140,7 @@ class TestMain(unittest.TestCase):
         assert b"France" in response.data
         assert b"Brussels" in response.data
 
-    @patch("utils.firebase.get_avg_rating", return_value=4.5)
+    @patch("components.firebase.database.get_avg_rating", return_value=4.5)
     def test_02_my_listings(self, mock_get_avg_rating):
         """
         Make a request to the index route and verify that it returns the correct listings.
@@ -154,7 +154,7 @@ class TestMain(unittest.TestCase):
         assert b"France" in response.data
         assert b"Paris" in response.data
 
-    @patch("utils.firebase.get_avg_rating", return_value=4.5)
+    @patch("components.firebase.database.get_avg_rating", return_value=4.5)
     def test_03_my_stays(self, mock_get_avg_rating):
         """
         Test the my_stays route.
@@ -170,7 +170,7 @@ class TestMain(unittest.TestCase):
         assert b"5" in response.data
         assert b"4" in response.data
 
-    @patch("utils.firebase.get_avg_rating", return_value=4.5)
+    @patch("components.firebase.database.get_avg_rating", return_value=4.5)
     def test_04_favs(self, mock_get_avg_rating):
         """
         Test the favorites route while autheticated.

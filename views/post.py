@@ -9,7 +9,7 @@ from flask import (
     session,
 )
 from utils.auth import login_required
-from utils.firebase import firebase_get, firebase_query, get_ratings_property
+from components.firebase.database import firebase_get, firebase_query, get_ratings_property
 from utils.gpt import get_travel_tips
 
 posts = Blueprint("posts", __name__)

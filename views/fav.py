@@ -2,9 +2,8 @@
 from flask import Blueprint, session
 from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 
-from config import fetch_db
 from utils.auth import login_required
-from utils.firebase import add_favorite, firebase_get, update_favorites
+from components.firebase.database import add_favorite, firebase_get, update_favorites
 from utils.render import render_message
 
 fav = Blueprint("fav", __name__)

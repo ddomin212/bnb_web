@@ -3,9 +3,8 @@ import os
 
 import stripe
 
-from .firebase import initialize_firebase
-from .papertrail import initialize_papertrail
-from .redis import initialize_redis
+from components.firebase.setup import FirebaseComponent
+from components.redis import RedisComponent
 
 
 def initialize_app(app, testing=False):
@@ -34,6 +33,5 @@ def initialize_app(app, testing=False):
         return {"env": os.environ}
 
     if not testing:
-        initialize_redis(app)
-        initialize_firebase()
-    # initialize_papertrail()
+        RedisComponent(app)
+        FirebaseComponent()

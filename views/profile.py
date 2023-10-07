@@ -3,7 +3,7 @@ from firebase_admin import auth
 from flask import Blueprint, redirect, render_template, request, session
 
 from utils.add import user_data
-from utils.firebase import firebase_query, get_avg_ratings, get_ratings_user
+from components.firebase.database import firebase_query, get_avg_ratings, get_ratings_user
 
 profile = Blueprint("profile", __name__)
 
